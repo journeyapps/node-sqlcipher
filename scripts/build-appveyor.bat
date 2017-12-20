@@ -151,6 +151,14 @@ ECHO calling npm test
 CALL npm test
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
+ECHO calling electron-rebuild
+CALL .\node_modules\.bin\electron-rebuild --force
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+ECHO calling electron-mocha
+CALL .\node_modules\.bin\electron-mocha
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
 :NPM_TEST_FINISHED
 
 
