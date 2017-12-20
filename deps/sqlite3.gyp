@@ -54,7 +54,7 @@
             '-lssleay32.lib',
           ],
           'library_dirs': [
-            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/<(openssl_root)'
+            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/<(openssl_root)'
           ]
         }
       }]
@@ -70,17 +70,17 @@
         {
           'action_name': 'unpack_sqlite_dep',
           'inputs': [
-            './sqlcipher-amalgation-<@(sqlite_version).tar.gz'
+            './sqlcipher-amalgamation-<@(sqlite_version).tar.gz'
           ],
           'outputs': [
-            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/sqlite3.c'
+            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/sqlite3.c'
           ],
-          'action': ['python','./extract.py','./sqlcipher-amalgation-<@(sqlite_version).tar.gz','<(SHARED_INTERMEDIATE_DIR)']
+          'action': ['python','./extract.py','./sqlcipher-amalgamation-<@(sqlite_version).tar.gz','<(SHARED_INTERMEDIATE_DIR)']
         }
       ],
       'direct_dependent_settings': {
         'include_dirs': [
-          '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/',
+          '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/',
         ]
       },
     },
@@ -92,7 +92,7 @@
         ["OS == \"win\"", {
           "copies": [
             {
-              "files": [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/>(openssl_root)/libeay32.dll' ],
+              "files": [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/libeay32.dll' ],
               "destination": "<(PRODUCT_DIR)"
             }
           ],
@@ -102,16 +102,16 @@
     {
       'target_name': 'sqlite3',
       'type': 'static_library',
-      'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/' ],
+      'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/' ],
       'dependencies': [
         'action_before_build',
         'copy_dll'
       ],
       'sources': [
-        '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/sqlite3.c'
+        '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/sqlite3.c'
       ],
       'direct_dependent_settings': {
-        'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/' ],
+        'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/' ],
         'defines': [
           'SQLITE_THREADSAFE=1',
           'SQLITE_ENABLE_FTS3',
