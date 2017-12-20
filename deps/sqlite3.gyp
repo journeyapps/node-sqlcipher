@@ -85,11 +85,27 @@
       },
     },
     {
+      "target_name": "copy_dll",
+      "type": "none",
+      "dependencies": [ "action_before_build" ],
+      "conditions": [
+        ["OS == \"win\"", {
+          "copies": [
+            {
+              "files": [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/>(openssl_root)/libeay32.dll' ],
+              "destination": "<(PRODUCT_DIR)"
+            }
+          ],
+        }]
+      ]
+    },
+    {
       'target_name': 'sqlite3',
       'type': 'static_library',
       'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/' ],
       'dependencies': [
-        'action_before_build'
+        'action_before_build',
+        'copy_dll'
       ],
       'sources': [
         '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/sqlite3.c'
@@ -121,21 +137,6 @@
       ],
       'export_dependent_settings': [
         'action_before_build',
-      ]
-    },
-    {
-      "target_name": "action_after_build",
-      "type": "none",
-      "dependencies": [ "action_before_build" ],
-      "conditions": [
-        ["OS == \"win\"", {
-          "copies": [
-            {
-              "files": [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgation-<@(sqlite_version)/<(openssl_root)/libeay32.dll' ],
-              "destination": "<(PRODUCT_DIR)"
-            }
-          ],
-        }]
       ]
     }
   ]
