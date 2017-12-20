@@ -38,7 +38,7 @@ bin/libeay32.dll
 
 Place these files in `sqlcipher-amalgation-<version>/OpenSSL-Win32` and `sqlcipher-amalgation-<version>/OpenSSL-Win64`.
 
-Copy the header files to `sqlcipher-amalgation-<version>/openssl`.
+Copy the header files to `sqlcipher-amalgation-<version>/openssl-include/openssl`.
 
 ## Step 3: Build the archive
 

@@ -57,6 +57,12 @@
             '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/<(openssl_root)'
           ]
         }
+      }, {
+        'link_settings': {
+          'libraries': [
+            '-lcrypto'
+          ]
+        }
       }]
     ],
   },
@@ -102,7 +108,20 @@
     {
       'target_name': 'sqlite3',
       'type': 'static_library',
-      'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/' ],
+      "conditions": [
+        ["OS == \"win\"", {
+          'include_dirs': [
+            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/',
+            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/openssl-include/'
+          ],
+        },
+        { # OS != win
+          'include_dirs': [
+            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/'
+          ],
+        }]
+      ],
+
       'dependencies': [
         'action_before_build',
         'copy_dll'
@@ -111,7 +130,9 @@
         '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/sqlite3.c'
       ],
       'direct_dependent_settings': {
-        'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/' ],
+        'include_dirs': [
+          '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/'
+        ],
         'defines': [
           'SQLITE_THREADSAFE=1',
           'SQLITE_ENABLE_FTS3',

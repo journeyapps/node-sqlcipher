@@ -45,6 +45,9 @@
   ],
   "devDependencies": {
     "aws-sdk": "2.x",
+    "electron": "^1.7.10",
+    "electron-mocha": "^5.0.0",
+    "electron-rebuild": "^1.6.0",
     "eslint": "3.5.0",
     "mocha": "3.x"
   },
