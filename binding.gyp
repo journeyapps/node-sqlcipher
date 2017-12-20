@@ -16,12 +16,12 @@
             ],
             "conditions": [ [ "OS=='linux'", {"libraries+":["-Wl,-rpath=<@(sqlite)/lib"]} ] ],
             "conditions": [ [ "OS!='win'", {"libraries+":["-L<@(sqlite)/lib"]} ] ],
-            'msvs_settings': {
-              'VCLinkerTool': {
-                'AdditionalLibraryDirectories': [
-                  '<(sqlite)/lib'
-                ],
-              },
+            "msvs_settings": {
+              "VCLinkerTool": {
+                "AdditionalLibraryDirectories": [
+                  "<(sqlite)/lib"
+                ]
+              }
             }
         },
         {
@@ -46,6 +46,16 @@
             "files": [ "<(PRODUCT_DIR)/<(module_name).node" ],
             "destination": "<(module_path)"
           }
+      ],
+      "conditions": [
+        ["OS == \"win\"", {
+          "copies": [
+              {
+                "files": [ "<(PRODUCT_DIR)/libeay32.dll" ],
+                "destination": "<(module_path)"
+              }
+          ]
+        }]
       ]
     }
   ]
