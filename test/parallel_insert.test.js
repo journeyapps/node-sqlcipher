@@ -28,7 +28,7 @@ describe('parallel', function() {
         }
 
         db.wait(done);
-    }).timeout(10000);
+    }).timeout(30000);
 
     it('should close the database', function(done) {
         db.close(done);
