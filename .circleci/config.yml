@@ -1,0 +1,74 @@
+version: 2
+jobs:
+  build-node-common: &common-build
+    docker:
+      # The docker section here is not used, but required
+      - image: circleci/node:8.9.3
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      # Install git-lfs (not part of the standard Docker images)
+      - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package-lock.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: npm install --build-from-source
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+
+      - run: npm run test
+
+  build-9.3.0:
+    <<: *common-build
+    docker:
+      - image: circleci/node:9.3.0
+
+  build-8.9.3:
+    <<: *common-build
+    docker:
+      - image: circleci/node:8.9.3
+
+  build-7.9.0:
+    <<: *common-build
+    docker:
+      - image: circleci/node:7.9.0
+
+  build-macos:
+    macos:
+      xcode: "9.1.0" # Node 8.9.0
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-osx-{{ checksum "package-lock.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-osx-
+
+      - run: npm install --build-from-source
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-osx-{{ checksum "package-lock.json" }}
+
+      - run: npm run test
+
+workflows:
+  version: 2
+  build_all:
+    jobs:
+      - build-9.3.0
+      - build-8.9.3
+      - build-7.9.0
+      # macOS is disabled for now, until the macOS plan is activated on CircleCI
+      # - build-macos
