@@ -70,7 +70,7 @@ jobs:
           key: v1-dependencies-{{ checksum "package-lock.json" }}
 
       - run: npm run pretest
-      - run: xvfb-run ./node_modules/.bin/electron-mocha
+      - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
 
   build-macos:
     macos:
