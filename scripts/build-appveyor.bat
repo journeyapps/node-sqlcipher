@@ -139,6 +139,13 @@ SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
 IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS%) ELSE (ECHO not publishing)
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
+:: Do the same for electron
+CALL node_modules\.bin\node-pre-gyp package %TOOLSET_ARGS% --runtime=electron --target=1.7.9
+SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
+IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=1.7.9) ELSE (ECHO not publishing)
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+
 GOTO DONE
 
 
