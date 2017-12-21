@@ -26,6 +26,16 @@ jobs:
           key: v1-dependencies-{{ checksum "package-lock.json" }}
 
       - run: npm run test
+      - run: &publish-command
+          name: Publish
+          command: |
+            if [[ "$CIRCLE_TAG" =~ ^v[0-9]*\.[0-9]*\.[0-9]*(-[0-9a-z]*)?$ ]]; then
+              ./node_modules/.bin/node-pre-gyp package testpackage $PRE_GYP_ARGS
+              ./node_modules/.bin/node-pre-gyp publish $PRE_GYP_ARGS
+            else
+              echo "Not a tagged build - not publishing"
+            fi
+
 
   build-9.3.0:
     <<: *common-build
@@ -47,6 +57,8 @@ jobs:
       - image: circleci/node:8.9.3
 
     working_directory: ~/repo
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=1.7.9
 
     steps:
       - checkout
@@ -71,6 +83,8 @@ jobs:
       - run: ./node_modules/.bin/electron-rebuild
       - run: npm run pretest
       - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
+      - run:
+          <<: *publish-command
 
   build-macos:
     macos:
@@ -96,6 +110,8 @@ jobs:
       - run: npm run test
       - run: ./node_modules/.bin/electron-rebuild
       - run: ./node_modules/.bin/electron-mocha --timeout 480000
+      - run:
+          <<: *publish-command
 
 workflows:
   version: 2
