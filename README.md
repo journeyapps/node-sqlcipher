@@ -4,16 +4,27 @@ While the `node-sqlite3` project does include support for compiling against sqlc
 
 ## Supported platforms
 
-Tested on Node v8.x, and Electron 1.7.9.
+Tested on Node v8.x and Electron 1.7.9, on Windows, Mac and Linux.
 
-# Installing
+# Requirements
+
+### Windows
+
+ * Visual Studio 2015
+ * Python 2.7
+
+### Mac
+
+ * `brew install openssl`
+
+# Installation
 
 ```sh
 yarn install "@journeyapps/sqlcipher"
 # Or: npm install --save "@journeyapps/sqlcipher"
 ```
 
-For electron, this should work with `electron-rebuild`.
+For Electron, use `electron-rebuild` or similar tool.
 
 # Usage
 
@@ -41,11 +52,17 @@ db.close();
 
 # SQLCipher
 
-A copy of the source for SQLCipher 3.4.1 is bundled, based on SQLite 3.15.2.
+A copy of the source for SQLCipher 3.4.1 is bundled, which is based on SQLite 3.15.2.
 
-On Windows, OpenSSL 1.0.2n is additionally bundled. This is specifically used for Electron builds. Pre-built libraries are used from https://slproweb.com/products/Win32OpenSSL.html.
+## OpenSSL
 
-On other platforms, OpenSSL is provided by NodeJS.
+SQLCipher depends on OpenSSL. When using NodeJS, OpenSSL is provided by NodeJS itself. For Electron, we need to use our own copy.
+
+For Windows we bundle OpenSSL 1.0.2n. Pre-built libraries are used from https://slproweb.com/products/Win32OpenSSL.html.
+
+On Mac we build against OpenSSL installed via brew, but statically link it so that end-users do not need to install it.
+
+On Linux we dynamically link against the system OpenSSL.
 
 # API
 
