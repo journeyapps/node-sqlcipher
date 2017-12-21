@@ -1,7 +1,7 @@
 {
-  "name": "sqlite3",
+  "name": "@journeyapps/sqlcipher",
   "description": "Asynchronous, non-blocking SQLite3 bindings",
-  "version": "3.1.13",
+  "version": "3.1.15",
   "homepage": "http://github.com/mapbox/node-sqlite3",
   "author": {
     "name": "MapBox",
@@ -10,7 +10,7 @@
   "binary": {
     "module_name": "node_sqlite3",
     "module_path": "./lib/binding/{node_abi}-{platform}-{arch}",
-    "host": "https://mapbox-node-binary.s3.amazonaws.com",
+    "host": "https://journeyapps-node-binary.s3.amazonaws.com",
     "remote_path": "./{name}/v{version}/{toolset}/",
     "package_name": "{node_abi}-{platform}-{arch}.tar.gz"
   },
@@ -45,6 +45,9 @@
   ],
   "devDependencies": {
     "aws-sdk": "2.x",
+    "electron": "^1.7.10",
+    "electron-mocha": "^5.0.0",
+    "electron-rebuild": "^1.6.0",
     "eslint": "3.5.0",
     "mocha": "3.x"
   },
