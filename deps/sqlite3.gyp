@@ -57,7 +57,19 @@
             '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/<(openssl_root)'
           ]
         }
-      }, {
+      },
+      'OS == "mac"', {
+        'variables': {
+          'openssl_root%': '/usr/local/opt/openssl'
+        },
+        'link_settings': {
+          'libraries': [
+            # This statically links libcrypto, whereas -lcrypto would dynamically link it
+            '<(openssl_root)/lib/libcrypto.a'
+          ]
+        }
+      },
+      { # Linux
         'link_settings': {
           'libraries': [
             '-lcrypto'
@@ -113,12 +125,18 @@
           'include_dirs': [
             '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/',
             '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/openssl-include/'
-          ],
+          ]
         },
-        { # OS != win
+        "OS == \"mac\"", {
+          'include_dirs': [
+            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/',
+            '>(openssl_root)/include'
+          ]
+        },
+        { # linux
           'include_dirs': [
             '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/'
-          ],
+          ]
         }]
       ],
 

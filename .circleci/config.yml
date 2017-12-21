@@ -62,13 +62,13 @@ jobs:
           - v1-dependencies-
 
       - run: npm install --build-from-source
-      - run: ./node_modules/.bin/electron-rebuild
 
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package-lock.json" }}
 
+      - run: ./node_modules/.bin/electron-rebuild
       - run: npm run pretest
       - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
 
@@ -78,6 +78,8 @@ jobs:
 
     steps:
       - checkout
+      - run: brew install git-lfs openssl
+      - run: git-lfs pull
       - restore_cache:
           keys:
           - v1-dependencies-osx-{{ checksum "package-lock.json" }}
@@ -92,6 +94,8 @@ jobs:
           key: v1-dependencies-osx-{{ checksum "package-lock.json" }}
 
       - run: npm run test
+      - run: ./node_modules/.bin/electron-rebuild
+      - run: ./node_modules/.bin/electron-mocha --timeout 480000
 
 workflows:
   version: 2
@@ -101,5 +105,4 @@ workflows:
       - build-8.9.3
       - build-7.9.0
       - build-electron
-      # macOS is disabled for now, until the macOS plan is activated on CircleCI
-      # - build-macos
+      - build-macos
