@@ -29,7 +29,8 @@ jobs:
       - run: &publish-command
           name: Publish
           command: |
-            if [[ "$CIRCLE_TAG" =~ ^v[0-9]*\.[0-9]*\.[0-9]*(-[0-9a-z]*)?$ ]]; then
+            COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
+            if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]]; then
               ./node_modules/.bin/node-pre-gyp package testpackage $PRE_GYP_ARGS
               ./node_modules/.bin/node-pre-gyp publish $PRE_GYP_ARGS
             else
