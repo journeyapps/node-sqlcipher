@@ -1,11 +1,11 @@
 {
   "name": "@journeyapps/sqlcipher",
-  "description": "Asynchronous, non-blocking SQLite3 bindings",
+  "description": "Asynchronous, non-blocking SQLCipher bindings",
   "version": "3.1.16",
-  "homepage": "http://github.com/mapbox/node-sqlite3",
+  "homepage": "http://github.com/journeyapps/node-sqlcipher",
   "author": {
-    "name": "MapBox",
-    "url": "https://mapbox.com/"
+    "name": "JourneyApps",
+    "url": "https://journeyapps.com/"
   },
   "binary": {
     "module_name": "node_sqlite3",
@@ -34,7 +34,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/mapbox/node-sqlite3.git"
+    "url": "git://github.com/journeyapps/node-sqlcipher.git"
   },
   "dependencies": {
     "nan": "~2.7.0",
