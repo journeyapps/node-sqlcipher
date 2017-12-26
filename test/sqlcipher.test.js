@@ -52,7 +52,7 @@ describe('sqlcipher', function() {
     it('should fail to read a table', function(done) {
         db.run("SELECT * FROM foo", function(err) {
             if (err) {
-                assert.equal(err.message, 'SQLITE_NOTADB: file is encrypted or is not a database');
+                assert.equal(err.message, 'SQLITE_NOTADB: file is not a database');
                 assert.equal(err.errno, sqlite3.NOTADB);
                 assert.equal(err.code, 'SQLITE_NOTADB');
                 done();
