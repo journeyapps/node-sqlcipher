@@ -20,9 +20,10 @@ sqlite3.c
 sqlite3.h
 shell.c # optional
 sqlite3ext.h # optional
+VERSION # optional
 ```
 
-Copy these files to a new folder, `sqlcipher-amalgation-<version>`.
+Copy these files to a new folder, `sqlcipher-amalgamation-<version>`.
 
 ## Step 2: Get OpenSSL libraries
 
@@ -34,15 +35,16 @@ Download OpenSSL 1.0.x from https://slproweb.com/products/Win32OpenSSL.html, bot
 lib/libeay32.lib
 lib/ssleay32.lib
 bin/libeay32.dll
+bin/msvcr120.dll
 ```
 
-Place these files in `sqlcipher-amalgation-<version>/OpenSSL-Win32` and `sqlcipher-amalgation-<version>/OpenSSL-Win64`.
+Place these files in `sqlcipher-amalgamation-<version>/OpenSSL-Win32` and `sqlcipher-amalgamation-<version>/OpenSSL-Win64`.
 
-Copy the header files to `sqlcipher-amalgation-<version>/openssl-include/openssl`.
+Copy the header files (include folder) to `sqlcipher-amalgamation-<version>/openssl-include/openssl`.
 
 ## Step 3: Build the archive
 
-Archive the folder as `deps/sqlcipher-amalgation-<version>.tar.gz`, and update the version number in `common-sqlite.gypi` (must be the same).
+Archive the folder as `deps/sqlcipher-amalgamation-<version>.tar.gz`, and update the version number in `common-sqlite.gypi` (must be the same).
 
 ## Step 4: Test the build
 
@@ -61,7 +63,7 @@ npm run test
 
 # Notes
 
-The OpenSSL files are specifically required for Electron, which doesn't bundle OpenSSL like NodeJS does. The header and .lib files are required at compile-time, and the `libeay32.dll` is required at runtime. We bundle it with the library, so the user does not need to manually install OpenSSL.
+The OpenSSL files are specifically required for Electron, which doesn't bundle OpenSSL like NodeJS does. The header and .lib files are required at compile-time, and `libeay32.dll` and `mscvr120.dll` are required at runtime. We bundle it with the library, so the user does not need to manually install OpenSSL.
 
 `deps/sqlite3.gyp` has been modified from the original node-sqlite3 one to:
  * Use the bundled OpenSSL on Windows.
