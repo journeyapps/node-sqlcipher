@@ -77,6 +77,15 @@ In sqlite3's directory (where its `package.json` resides) run the following:
     npm install mocha
     npm test
 
+# Publishing
+
+To publish a new version, run:
+
+    npm version minor -m "%s [publish binary]"
+    npm publish
+
+Publishing of the prebuilt binaries is performed on CircleCI and AppVeyor.
+
 # Acknowledgments
 
 Most of the work in this library is from the [node-sqlite3](https://github.com/mapbox/node-sqlite3) library by [MapBox](http://mapbox.org/).
