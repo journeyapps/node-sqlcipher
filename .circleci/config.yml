@@ -69,7 +69,8 @@ jobs:
     steps:
       - checkout
       - run: brew install git-lfs openssl
-      - run: git-lfs pull
+      - run: git lfs install
+      - run: git lfs pull
       - restore_cache:
           keys:
           - v1-dependencies-osx-{{ checksum "package-lock.json" }}
