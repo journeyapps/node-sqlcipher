@@ -44,7 +44,7 @@ aliases:
 
   - &common-macos
     macos:
-      xcode: "9.3.1" # Node 10.1.0
+      xcode: "9.1.0" # Node 8.9.0
     steps:
       - checkout
       - run: |
@@ -146,7 +146,8 @@ workflows:
       - build-electron-2.0.4
       - build-electron-1.8.6
       - build-electron-1.7.11
-      - build-macos-10.1.0
+      # Not working currently
+      # - build-macos-10.1.0
       - build-macos-8.9.0
       - build-macos-electron-2.0.4
       - build-macos-electron-1.8.6
