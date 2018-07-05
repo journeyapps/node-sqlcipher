@@ -44,9 +44,7 @@ aliases:
 
   - &common-macos
     macos:
-      xcode: "9.4.0" # Node 10.3.0
-    environment:
-      ELECTRON_VERSION: 2.0.4
+      xcode: "9.3.1" # Node 10.1.0
     steps:
       - checkout
       - run: brew install git-lfs openssl
@@ -109,10 +107,10 @@ jobs:
       PRE_GYP_ARGS: --runtime=electron --target=1.7.9 --disturl=https://atom.io/download/electron
 
 
-  build-macos-10.3.0:
+  build-macos-10.1.0:
     <<: *common-macos
     macos:
-      xcode: "9.4.0" # Node 10.3.0
+      xcode: "9.3.1" # Node 10.3.0
 
   build-macos-8.9.0:
     <<: *common-macos
@@ -146,7 +144,7 @@ workflows:
       - build-electron-2.0.4
       - build-electron-1.8.6
       - build-electron-1.7.11
-      - build-macos-10.3.0
+      - build-macos-10.1.0
       - build-macos-8.9.0
       - build-macos-electron-2.0.4
       - build-macos-electron-1.8.6
