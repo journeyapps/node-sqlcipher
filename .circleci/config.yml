@@ -35,11 +35,42 @@ aliases:
       # These are required for electron(-mocha)
       - run: sudo apt-get install -y libgtk2.0-0 libxtst6 libxss1 libgconf2-4 libnss3 libasound2
       - run: npm install --build-from-source
-      - run: npm install electron@$ELECTRON_VERSION
+      - run: npm install --dev electron@$ELECTRON_VERSION
       - run: ./node_modules/.bin/electron-rebuild
       - run: npm run pretest
       - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
       - run: *publish-command
+
+
+  - &common-macos
+    macos:
+      xcode: "9.4.0" # Node 10.3.0
+    environment:
+      ELECTRON_VERSION: 2.0.4
+    steps:
+      - checkout
+      - run: brew install git-lfs openssl
+      - run: git lfs install
+      - run: git lfs pull
+      - restore_cache:
+          keys:
+          - v1-dependencies-osx-{{ checksum "package-lock.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-osx-
+
+      - run: npm install --build-from-source
+      - run: npm install --dev electron@$ELECTRON_VERSION
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-osx-{{ checksum "package-lock.json" }}
+
+      - run: npm run test
+      - run: ./node_modules/.bin/electron-rebuild
+      - run: ./node_modules/.bin/electron-mocha --timeout 480000
+      - run:
+          <<: *publish-command
 
 version: 2
 jobs:
@@ -75,40 +106,41 @@ jobs:
       ELECTRON_VERSION: 1.8.6
       PRE_GYP_ARGS: --runtime=electron --target=1.8.6
 
-  build-electron-1.7.9:
+  build-electron-1.7.11:
     <<: *common-electron-linux
     environment:
-      ELECTRON_VERSION: 1.7.9
+      ELECTRON_VERSION: 1.7.11
       PRE_GYP_ARGS: --runtime=electron --target=1.7.9
 
 
-  build-macos:
+  build-macos-10.3.0:
+    <<: *common-macos
+    macos:
+      xcode: "9.4.0" # Node 10.3.0
+
+  build-macos-8.9.0:
+    <<: *common-macos
     macos:
       xcode: "9.1.0" # Node 8.9.0
 
-    steps:
-      - checkout
-      - run: brew install git-lfs openssl
-      - run: git lfs install
-      - run: git lfs pull
-      - restore_cache:
-          keys:
-          - v1-dependencies-osx-{{ checksum "package-lock.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-osx-
 
-      - run: npm install --build-from-source
+  build-macos-electron-2.0.4:
+    <<: *common-macos
+    environment:
+      ELECTRON_VERSION: 2.0.4
+      PRE_GYP_ARGS: --runtime=electron --target=2.0.4
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-osx-{{ checksum "package-lock.json" }}
+  build-macos-electron-1.8.6:
+    <<: *common-macos
+    environment:
+      ELECTRON_VERSION: 1.8.6
+      PRE_GYP_ARGS: --runtime=electron --target=1.8.6
 
-      - run: npm run test
-      - run: ./node_modules/.bin/electron-rebuild
-      - run: ./node_modules/.bin/electron-mocha --timeout 480000
-      - run:
-          <<: *publish-command
+  build-macos-electron-1.7.11:
+    <<: *common-macos
+    environment:
+      ELECTRON_VERSION: 1.7.11
+      PRE_GYP_ARGS: --runtime=electron --target=1.7.11
 
 workflows:
   version: 2
@@ -121,4 +153,8 @@ workflows:
       - build-electron-2.0.4
       - build-electron-1.8.6
       - build-electron-1.7.9
-      - build-macos
+      - build-macos-10.3.0
+      - build-macos-8.9.0
+      - build-macos-electron-2.0.4
+      - build-macos-electron-1.8.6
+      - build-macos-electron-1.7.11
