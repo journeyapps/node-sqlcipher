@@ -1,12 +1,17 @@
-version: 2
-jobs:
-  build-node-common: &common-build
-    docker:
-      # The docker section here is not used, but required
-      - image: circleci/node:8.9.3
+aliases:
+  - &publish-command
+    name: Publish
+    command: |
+      COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
+      if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]]; then
+        ./node_modules/.bin/node-pre-gyp package testpackage $PRE_GYP_ARGS
+        ./node_modules/.bin/node-pre-gyp publish $PRE_GYP_ARGS
+      else
+        echo "Not a tagged build - not publishing"
+      fi
 
+  - &common-build
     working_directory: ~/repo
-
     steps:
       - checkout
       # Install git-lfs (not part of the standard Docker images)
@@ -14,17 +19,34 @@ jobs:
       - run: npm install --build-from-source
 
       - run: npm run test
-      - run: &publish-command
-          name: Publish
-          command: |
-            COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
-            if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]]; then
-              ./node_modules/.bin/node-pre-gyp package testpackage $PRE_GYP_ARGS
-              ./node_modules/.bin/node-pre-gyp publish $PRE_GYP_ARGS
-            else
-              echo "Not a tagged build - not publishing"
-            fi
+      - run: *publish-command
 
+
+  - &common-electron-linux
+    docker:
+      - image: circleci/node:10.5.0
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      # Install git-lfs (not part of the standard Docker images)
+      - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
+      # These are required for electron(-mocha)
+      - run: sudo apt-get install -y libgtk2.0-0 libxtst6 libxss1 libgconf2-4 libnss3 libasound2
+      - run: npm install --build-from-source
+      - run: npm install electron@$ELECTRON_VERSION
+      - run: ./node_modules/.bin/electron-rebuild
+      - run: npm run pretest
+      - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
+      - run: *publish-command
+
+version: 2
+jobs:
+  build-10.5.0:
+    <<: *common-build
+    docker:
+      - image: circleci/node:10.5.0
 
   build-9.3.0:
     <<: *common-build
@@ -41,26 +63,24 @@ jobs:
     docker:
       - image: circleci/node:7.9.0
 
-  build-electron:
-    docker:
-      - image: circleci/node:8.9.3
-
-    working_directory: ~/repo
+  build-electron-2.0.4:
+    <<: *common-electron-linux
     environment:
+      ELECTRON_VERSION: 2.0.4
+      PRE_GYP_ARGS: --runtime=electron --target=2.0.4
+
+  build-electron-1.8.6:
+    <<: *common-electron-linux
+    environment:
+      ELECTRON_VERSION: 1.8.6
+      PRE_GYP_ARGS: --runtime=electron --target=1.8.6
+
+  build-electron-1.7.9:
+    <<: *common-electron-linux
+    environment:
+      ELECTRON_VERSION: 1.7.9
       PRE_GYP_ARGS: --runtime=electron --target=1.7.9
 
-    steps:
-      - checkout
-      # Install git-lfs (not part of the standard Docker images)
-      - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
-      # These are required for electron(-mocha)
-      - run: sudo apt-get install -y libgtk2.0-0 libxtst6 libxss1 libgconf2-4 libnss3 libasound2
-      - run: npm install --build-from-source
-      - run: ./node_modules/.bin/electron-rebuild
-      - run: npm run pretest
-      - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
-      - run:
-          <<: *publish-command
 
   build-macos:
     macos:
@@ -94,8 +114,11 @@ workflows:
   version: 2
   build_all:
     jobs:
+      - build-10.5.0
       - build-9.3.0
       - build-8.9.3
       - build-7.9.0
-      - build-electron
+      - build-electron-2.0.4
+      - build-electron-1.8.6
+      - build-electron-1.7.9
       - build-macos
