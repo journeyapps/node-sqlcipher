@@ -54,16 +54,16 @@ aliases:
       - run: git lfs pull
       - restore_cache:
           keys:
-          - v1-dependencies-osx-{{ checksum "package-lock.json" }}
+          - v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package-lock.json" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-osx-
+          - v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}
 
       - run: npm install --build-from-source
 
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-osx-{{ checksum "package-lock.json" }}
+          key: v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package-lock.json" }}
 
       - run: npm run test
       - run: ./node_modules/.bin/electron-rebuild
