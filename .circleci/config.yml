@@ -47,7 +47,9 @@ aliases:
       xcode: "9.3.1" # Node 10.1.0
     steps:
       - checkout
-      - run: brew install git-lfs openssl
+      - run: |
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          brew install git-lfs openssl || true
       - run: git lfs install
       - run: git lfs pull
       - restore_cache:
