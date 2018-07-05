@@ -33,7 +33,7 @@ aliases:
       # Install git-lfs (not part of the standard Docker images)
       - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
       # These are required for electron(-mocha)
-      - run: sudo apt-get install -y libgtk2.0-0 libxtst6 libxss1 libgconf2-4 libnss3 libasound2
+      - run: sudo apt-get install -y libgtk2.0-0 libgtk-3-dev libxtst6 libxss1 libgconf2-4 libnss3 libasound2
       - run: npm install --build-from-source
       - run: npm install --dev electron@$ELECTRON_VERSION
       - run: ./node_modules/.bin/electron-rebuild
@@ -152,7 +152,7 @@ workflows:
       - build-7.9.0
       - build-electron-2.0.4
       - build-electron-1.8.6
-      - build-electron-1.7.9
+      - build-electron-1.7.11
       - build-macos-10.3.0
       - build-macos-8.9.0
       - build-macos-electron-2.0.4
