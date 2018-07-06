@@ -1,12 +1,18 @@
-version: 2
-jobs:
-  build-node-common: &common-build
-    docker:
-      # The docker section here is not used, but required
-      - image: circleci/node:8.9.3
+aliases:
+  - &publish-command
+    name: Publish
+    command: |
+      COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
+      ./node_modules/.bin/node-pre-gyp rebuild package testpackage $PRE_GYP_ARGS
+      if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]]; then
+        ./node_modules/.bin/node-pre-gyp package testpackage $PRE_GYP_ARGS
+        ./node_modules/.bin/node-pre-gyp publish $PRE_GYP_ARGS
+      else
+        echo "Not a tagged build - not publishing"
+      fi
 
+  - &common-build
     working_directory: ~/repo
-
     steps:
       - checkout
       # Install git-lfs (not part of the standard Docker images)
@@ -14,17 +20,63 @@ jobs:
       - run: npm install --build-from-source
 
       - run: npm run test
-      - run: &publish-command
-          name: Publish
-          command: |
-            COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
-            if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]]; then
-              ./node_modules/.bin/node-pre-gyp package testpackage $PRE_GYP_ARGS
-              ./node_modules/.bin/node-pre-gyp publish $PRE_GYP_ARGS
-            else
-              echo "Not a tagged build - not publishing"
-            fi
+      - run: *publish-command
 
+
+  - &common-electron-linux
+    docker:
+      - image: circleci/node:10.5.0
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      # Install git-lfs (not part of the standard Docker images)
+      - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
+      # These are required for electron(-mocha)
+      - run: sudo apt-get install -y libgtk2.0-0 libgtk-3-dev libxtst6 libxss1 libgconf2-4 libnss3 libasound2
+      - run: npm install --build-from-source
+      - run: ./node_modules/.bin/electron-rebuild
+      - run: npm run pretest
+      - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
+      - run: *publish-command
+
+
+  - &common-macos
+    macos:
+      xcode: "9.1.0" # Node 8.9.0
+    steps:
+      - checkout
+      - run: |
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          brew install git-lfs openssl || true
+      - run: git lfs install
+      - run: git lfs pull
+      - restore_cache:
+          keys:
+          - v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package-lock.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}
+
+      - run: npm install --build-from-source
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package-lock.json" }}
+
+      - run: npm run test
+      - run: ./node_modules/.bin/electron-rebuild
+      - run: ./node_modules/.bin/electron-mocha --timeout 480000
+      - run:
+          <<: *publish-command
+
+version: 2
+jobs:
+  build-10.5.0:
+    <<: *common-build
+    docker:
+      - image: circleci/node:10.5.0
 
   build-9.3.0:
     <<: *common-build
@@ -41,61 +93,62 @@ jobs:
     docker:
       - image: circleci/node:7.9.0
 
-  build-electron:
-    docker:
-      - image: circleci/node:8.9.3
-
-    working_directory: ~/repo
+  build-electron-2.0.4:
+    <<: *common-electron-linux
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=1.7.9
+      PRE_GYP_ARGS: --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron
 
-    steps:
-      - checkout
-      # Install git-lfs (not part of the standard Docker images)
-      - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
-      # These are required for electron(-mocha)
-      - run: sudo apt-get install -y libgtk2.0-0 libxtst6 libxss1 libgconf2-4 libnss3 libasound2
-      - run: npm install --build-from-source
-      - run: ./node_modules/.bin/electron-rebuild
-      - run: npm run pretest
-      - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
-      - run:
-          <<: *publish-command
+  build-electron-1.8.6:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron
 
-  build-macos:
+  build-electron-1.7.11:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=1.7.9 --disturl=https://atom.io/download/electron
+
+
+  build-macos-10.1.0:
+    <<: *common-macos
+    macos:
+      xcode: "9.3.1" # Node 10.3.0
+
+  build-macos-8.9.0:
+    <<: *common-macos
     macos:
       xcode: "9.1.0" # Node 8.9.0
 
-    steps:
-      - checkout
-      - run: brew install git-lfs openssl
-      - run: git lfs install
-      - run: git lfs pull
-      - restore_cache:
-          keys:
-          - v1-dependencies-osx-{{ checksum "package-lock.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-osx-
 
-      - run: npm install --build-from-source
+  build-macos-electron-2.0.4:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-osx-{{ checksum "package-lock.json" }}
+  build-macos-electron-1.8.6:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron
 
-      - run: npm run test
-      - run: ./node_modules/.bin/electron-rebuild
-      - run: ./node_modules/.bin/electron-mocha --timeout 480000
-      - run:
-          <<: *publish-command
+  build-macos-electron-1.7.11:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=1.7.11 --disturl=https://atom.io/download/electron
 
 workflows:
   version: 2
   build_all:
     jobs:
+      - build-10.5.0
       - build-9.3.0
       - build-8.9.3
       - build-7.9.0
-      - build-electron
-      - build-macos
+      - build-electron-2.0.4
+      - build-electron-1.8.6
+      - build-electron-1.7.11
+      # Not working currently
+      # - build-macos-10.1.0
+      - build-macos-8.9.0
+      - build-macos-electron-2.0.4
+      - build-macos-electron-1.8.6
+      - build-macos-electron-1.7.11

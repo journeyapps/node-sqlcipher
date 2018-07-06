@@ -140,11 +140,21 @@ IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 :: Do the same for electron
-CALL node_modules\.bin\node-pre-gyp package %TOOLSET_ARGS% --runtime=electron --target=1.7.9
+CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=1.7.11 --disturl=https://atom.io/download/electron
 SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=1.7.9) ELSE (ECHO not publishing)
+IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=1.7.11 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
+
+CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron
+SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
+IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron
+SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
+IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 GOTO DONE
 
