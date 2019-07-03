@@ -15,8 +15,9 @@ aliases:
     working_directory: ~/repo
     steps:
       - checkout
-      # Install git-lfs (not part of the standard Docker images)
-      - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
+      # Install git-lfs (not part of the standard Docker images)- run: sudo apt-get update
+      - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+      - run: sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
       - run: npm install --build-from-source
 
       - run: npm run test
@@ -25,16 +26,15 @@ aliases:
 
   - &common-electron-linux
     docker:
-      - image: circleci/node:10.5.0
+      - image: circleci/node:10.15.1
 
     working_directory: ~/repo
 
     steps:
       - checkout
       # Install git-lfs (not part of the standard Docker images)
-      - run: sudo apt-get update
       - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-      - run: sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
+      - run: sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
       # These are required for electron(-mocha)
       - run: sudo apt-get install -y libgtk2.0-0 libgtk-3-dev libxtst6 libxss1 libgconf2-4 libnss3 libasound2
       - run: npm install --build-from-source
@@ -75,25 +75,17 @@ aliases:
 
 version: 2
 jobs:
-  build-10.5.0:
+  build-10.15.1:
     <<: *common-build
     docker:
-      - image: circleci/node:10.5.0
+      - image: circleci/node:10.15.1
 
-  build-9.3.0:
-    <<: *common-build
-    docker:
-      - image: circleci/node:9.3.0
 
-  build-8.9.3:
+  build-8.15.1:
     <<: *common-build
     docker:
-      - image: circleci/node:8.9.3
+      - image: circleci/node:8.15.1
 
-  build-7.9.0:
-    <<: *common-build
-    docker:
-      - image: circleci/node:7.9.0
 
   build-electron-5.0.6:
     <<: *common-electron-linux
@@ -116,46 +108,23 @@ jobs:
       PRE_GYP_ARGS: --runtime=electron --target=1.7.9 --disturl=https://atom.io/download/electron
 
 
-  build-macos-10.1.0:
+  build-macos-10.11.0:
     <<: *common-macos
     macos:
-      xcode: "9.3.1" # Node 10.3.0
-
-  build-macos-8.9.0:
-    <<: *common-macos
-    macos:
-      xcode: "9.1.0" # Node 8.9.0
+      xcode: "10.0.0" # Node 10.11.0
 
 
-  build-macos-electron-2.0.4:
+  build-macos-electron-5.0.6:
     <<: *common-macos
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron
-
-  build-macos-electron-1.8.6:
-    <<: *common-macos
-    environment:
-      PRE_GYP_ARGS: --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron
-
-  build-macos-electron-1.7.11:
-    <<: *common-macos
-    environment:
-      PRE_GYP_ARGS: --runtime=electron --target=1.7.11 --disturl=https://atom.io/download/electron
+      PRE_GYP_ARGS: --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
 
 workflows:
   version: 2
   build_all:
     jobs:
-      - build-10.5.0
-      - build-9.3.0
-      - build-8.9.3
-      - build-7.9.0
-      - build-electron-2.0.4
-      - build-electron-1.8.6
-      - build-electron-1.7.11
-      # Not working currently
-      # - build-macos-10.1.0
-      - build-macos-8.9.0
-      - build-macos-electron-2.0.4
-      - build-macos-electron-1.8.6
-      - build-macos-electron-1.7.11
+      - build-10.15.1
+      - build-8.15.1
+      - build-electron-5.0.6
+      - build-macos-10.11.0
+      - build-macos-electron-5.0.6
