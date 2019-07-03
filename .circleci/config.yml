@@ -93,6 +93,11 @@ jobs:
     docker:
       - image: circleci/node:7.9.0
 
+  build-electron-5.0.6:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
+
   build-electron-2.0.4:
     <<: *common-electron-linux
     environment:
