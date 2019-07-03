@@ -10,4 +10,8 @@ describe('fts', function() {
     it('should create a new fts4 table', function(done) {
         db.exec('CREATE VIRTUAL TABLE t1 USING fts4(content="", a, b, c);', done);
     });
+
+    it('should create a new fts5 table', function(done) {
+        db.exec('CREATE VIRTUAL TABLE t2 USING fts5(content="", a, b, c);', done);
+    });
 });

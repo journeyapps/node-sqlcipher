@@ -52,7 +52,7 @@ db.close();
 
 # SQLCipher
 
-A copy of the source for SQLCipher 3.4.1 is bundled, which is based on SQLite 3.15.2.
+A copy of the source for SQLCipher 4.0.1 is bundled, which is based on SQLite 3.26.0.
 
 ## OpenSSL
 
