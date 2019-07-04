@@ -26,7 +26,7 @@ aliases:
 
   - &common-electron-linux
     docker:
-      - image: circleci/node:10.15.1
+      - image: circleci/node:10.16.0
 
     working_directory: ~/repo
 
@@ -43,10 +43,9 @@ aliases:
       - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
       - run: *publish-command
 
-
   - &common-macos
     macos:
-      xcode: "9.1.0" # Node 8.9.0
+      xcode: "10.2.1"
     steps:
       - checkout
       - run: |
@@ -54,18 +53,25 @@ aliases:
           brew install git-lfs openssl || true
       - run: git lfs install
       - run: git lfs pull
-      - restore_cache:
-          keys:
-          - v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package-lock.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}
+      - run:
+          name: Install Node
+          command: |
+            source ~/.bash_profile
 
-      - run: npm install --build-from-source
+            # Install the correct Node version
+            curl --silent -o node.tar.xz https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-darwin-x64.tar.xz
+            tar xf node.tar.xz
+            echo 'export NODE_PATH=$HOME/node' >> $BASH_ENV
+            echo 'export PATH=$NODE_PATH/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+            mv node-v$NODE_VERSION-darwin-x64 $NODE_PATH
+            node -v
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-macos-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install & Build
+          command: |
+            node -v
+            npm install --build-from-source
 
       - run: npm run test
       - run: ./node_modules/.bin/electron-rebuild
@@ -75,10 +81,10 @@ aliases:
 
 version: 2
 jobs:
-  build-10.15.1:
+  build-10.16.0:
     <<: *common-build
     docker:
-      - image: circleci/node:10.15.1
+      - image: circleci/node:10.16.0
 
 
   build-8.15.1:
@@ -108,23 +114,26 @@ jobs:
       PRE_GYP_ARGS: --runtime=electron --target=1.7.9 --disturl=https://atom.io/download/electron
 
 
-  build-macos-10.11.0:
+  build-macos-10.16.0:
     <<: *common-macos
     macos:
-      xcode: "10.0.0" # Node 10.11.0
+      xcode: "10.2.1"
+    environment:
+      NODE_VERSION: "10.16.0"
 
 
   build-macos-electron-5.0.6:
     <<: *common-macos
     environment:
       PRE_GYP_ARGS: --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
 
 workflows:
   version: 2
   build_all:
     jobs:
-      - build-10.15.1
+      - build-10.16.0
       - build-8.15.1
       - build-electron-5.0.6
-      - build-macos-10.11.0
+      - build-macos-10.16.0
       - build-macos-electron-5.0.6
