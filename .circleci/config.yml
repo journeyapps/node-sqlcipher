@@ -45,7 +45,7 @@ aliases:
 
   - &common-macos
     macos:
-      xcode: "10.2.1"
+      xcode: "9.1.0"
     steps:
       - checkout
       - run: |
@@ -116,8 +116,6 @@ jobs:
 
   build-macos-10.16.0:
     <<: *common-macos
-    macos:
-      xcode: "10.2.1"
     environment:
       NODE_VERSION: "10.16.0"
 
