@@ -117,14 +117,14 @@ jobs:
   build-macos-10.16.0:
     <<: *common-macos
     environment:
-      NODE_VERSION: "10.16.0"
+      NODE_VERSION: "12.6.0"
 
 
   build-macos-electron-5.0.6:
     <<: *common-macos
     environment:
       PRE_GYP_ARGS: --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
-      NODE_VERSION: "10.16.0"
+      NODE_VERSION: "12.6.0"
 
 workflows:
   version: 2
