@@ -13,19 +13,11 @@ function publish() {
     fi
 }
 
-# test installing from source
-if [[ ${COVERAGE} == true ]]; then
-    CXXFLAGS="--coverage" LDFLAGS="--coverage" npm install --build-from-source  --clang=1
-    npm test
-    ./py-local/bin/cpp-coveralls --exclude node_modules --exclude tests --build-root build --gcov-options '\-lp' --exclude docs --exclude build/Release/obj/gen --exclude deps  > /dev/null
-else
-    echo "building binaries for publishing"
-    CFLAGS="${CFLAGS:-} -include $(pwd)/src/gcc-preinclude.h" CXXFLAGS="${CXXFLAGS:-} -include $(pwd)/src/gcc-preinclude.h" V=1 npm install --build-from-source  --clang=1
-    nm lib/binding/*/node_sqlite3.node | grep "GLIBCXX_" | c++filt  || true
-    nm lib/binding/*/node_sqlite3.node | grep "GLIBC_" | c++filt || true
-    npm test
-fi
-
+echo "building binaries for publishing"
+CFLAGS="${CFLAGS:-} -include $(pwd)/src/gcc-preinclude.h" CXXFLAGS="${CXXFLAGS:-} -include $(pwd)/src/gcc-preinclude.h" V=1 npm install --build-from-source  --clang=1
+nm lib/binding/*/node_sqlite3.node | grep "GLIBCXX_" | c++filt  || true
+nm lib/binding/*/node_sqlite3.node | grep "GLIBC_" | c++filt || true
+npm test
 
 publish
 
@@ -33,6 +25,7 @@ publish
 echo "building from source to test against external libsqlite3"
 export NODE_SQLITE3_JSON1=no
 if [[ $(uname -s) == 'Darwin' ]]; then
+    brew update
     brew install sqlite
     npm install --build-from-source --sqlite=$(brew --prefix) --clang=1
 else
@@ -56,7 +49,7 @@ if [[ $(uname -s) == 'Linux' ]]; then
         # enable 32 bit iojs
         export PATH=$(pwd)/iojs-${NVER}-${platform}-x86/bin:$(pwd)/iojs-${NVER}-${platform}-ia32/bin:$PATH
     else
-        wget http://nodejs.org/dist/${NVER}/node-${NVER}-${platform}-x86.tar.gz
+        wget https://nodejs.org/dist/${NVER}/node-${NVER}-${platform}-x86.tar.gz
         tar xf node-${NVER}-${platform}-x86.tar.gz
         # enable 32 bit node
         export PATH=$(pwd)/node-${NVER}-${platform}-x86/bin:$(pwd)/node-${NVER}-${platform}-ia32/bin:$PATH
