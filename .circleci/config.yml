@@ -45,12 +45,12 @@ aliases:
 
   - &common-macos
     macos:
-      xcode: "9.1.0"
+      xcode: "10.2.1"
     steps:
       - checkout
       - run: |
           export HOMEBREW_NO_AUTO_UPDATE=1
-          brew install git-lfs openssl || true
+          brew install git-lfs openssl@1.1 || true
       - run: git lfs install
       - run: git lfs pull
       - run:
