@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.0
+
+ - Update to SQLCipher 4.2.0 / SQLite 3.28.0.
+
 ## 3.2.1
 
  - Publish more prebuilt binaries.

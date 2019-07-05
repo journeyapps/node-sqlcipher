@@ -126,6 +126,11 @@ jobs:
     environment:
       NODE_VERSION: "10.16.0"
 
+  build-macos-8.16.0:
+    <<: *common-macos
+    environment:
+      NODE_VERSION: "8.16.0"
+
   build-macos-electron-5.0.6:
     <<: *common-macos
     environment:
