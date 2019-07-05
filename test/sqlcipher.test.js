@@ -21,6 +21,14 @@ describe('sqlcipher', function() {
         db.run("PRAGMA key = 'mysecret'", done);
     });
 
+
+    it("should use openssl", function(done) {
+        db.get("PRAGMA cipher_provider", (err, result) => {
+            assert.deepEqual(result, { cipher_provider: 'openssl' });
+            done(err);
+        });
+    });
+
     it('should create a table', function(done) {
         db.run("CREATE TABLE foo (id INT, num INT)", done);
     });
@@ -44,6 +52,20 @@ describe('sqlcipher', function() {
     it('should have created the file', function() {
         assert.fileExists('test/tmp/test_create.db.enc');
     });
+
+    it("should not be plaintext", function(done) {
+        const buffer = fs.readFileSync("test/tmp/test_create.db.enc");
+        const sqliteMagic = "SQLite format 3";
+        const actual = buffer.slice(0, sqliteMagic.length).toString("utf8");
+        if (actual == sqliteMagic) {
+          // The file contains the header in plain-text.
+          // This means it's definitely not encrypted.
+          done(new Error("The database is not encrypted!"));
+        } else {
+          // Not necessarily encrypted, but at least we did a basic check.
+          done();
+        }
+      });
 
     it('should open the database without a key', function(done) {
         db = new sqlite3.Database('test/tmp/test_create.db.enc', done);

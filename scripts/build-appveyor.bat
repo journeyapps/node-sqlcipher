@@ -4,9 +4,13 @@ SET EL=0
 
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %~f0 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+IF /I "%msvs_toolset%"=="" ECHO msvs_toolset unset, defaulting to 14 && SET msvs_toolset=14
+IF /I "%msvs_version%"=="" ECHO msvs_version unset, defaulting to 2015 && SET msvs_version=2015
+
 SET PATH=%CD%;%PATH%
-SET msvs_version=2013
-IF "%msvs_toolset%"=="14" SET msvs_version=2015
+IF "%msvs_toolset%"=="12" SET msvs_version=2013
+IF NOT "%NODE_RUNTIME%"=="" SET "TOOLSET_ARGS=%TOOLSET_ARGS% --runtime=%NODE_RUNTIME%"
+IF NOT "%NODE_RUNTIME_VERSION%"=="" SET "TOOLSET_ARGS=%TOOLSET_ARGS% --target=%NODE_RUNTIME_VERSION%"
 
 ECHO APPVEYOR^: %APPVEYOR%
 ECHO nodejs_version^: %nodejs_version%
@@ -14,7 +18,6 @@ ECHO platform^: %platform%
 ECHO msvs_toolset^: %msvs_toolset%
 ECHO msvs_version^: %msvs_version%
 ECHO TOOLSET_ARGS^: %TOOLSET_ARGS%
-
 
 ECHO activating VS command prompt
 :: NOTE this call makes the x64 -> X64
@@ -28,28 +31,12 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 ECHO using MSBuild^: && CALL msbuild /version && ECHO.
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-
 ECHO downloading/installing node
-::only use Install-Product when using VS2013
-::IF /I "%APPVEYOR%"=="True" IF /I "%msvs_toolset%"=="12" powershell Install-Product node $env:nodejs_version $env:Platform
-::TESTING:
-::always install (get npm matching node), but delete installed programfiles node.exe afterwards for VS2015 (using custom node.exe)
-IF /I "%APPVEYOR%"=="True" GOTO APPVEYOR_INSTALL
-GOTO SKIP_APPVEYOR_INSTALL
-
-:APPVEYOR_INSTALL
-IF /I "%platform%"=="x64" powershell Install-Product node $env:nodejs_version x64
-IF /I "%platform%"=="x86" powershell Install-Product node $env:nodejs_version x86
+powershell Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:PLATFORM
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-SET NODE_MAJOR=%nodejs_version:~0,1%
-ECHO node major version^: %NODE_MAJOR%
-IF %NODE_MAJOR% GTR 0 ECHO node version greater than zero, not updating npm && GOTO SKIP_APPVEYOR_INSTALL
 
 powershell Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-:SKIP_APPVEYOR_INSTALL
 
 ECHO available node.exe^:
 call where node
@@ -80,16 +67,15 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 IF /I "%NPM_BIN_DIR%"=="%CD%" ECHO ERROR npm bin -g equals local directory && SET ERRORLEVEL=1 && GOTO ERROR
 ECHO ===== where npm puts stuff END ============
 
-
-IF "%nodejs_version:~0,1%"=="0" npm install https://github.com/springmeyer/node-gyp/tarball/v3.x
+IF "%nodejs_version:~0,1%"=="4" CALL npm install node-gyp@3.x
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-IF "%nodejs_version:~0,1%"=="4" npm install node-gyp@3.x
+IF "%nodejs_version:~0,1%"=="5" CALL npm install node-gyp@3.x
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 CALL npm install --build-from-source --msvs_version=%msvs_version% %TOOLSET_ARGS% --loglevel=http
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-FOR /F "tokens=*" %%i in ('CALL node_modules\.bin\node-pre-gyp reveal module --silent') DO SET MODULE=%%i
+FOR /F "tokens=*" %%i in ('"CALL node_modules\.bin\node-pre-gyp reveal module %TOOLSET_ARGS% --silent"') DO SET MODULE=%%i
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 FOR /F "tokens=*" %%i in ('node -e "console.log(process.execPath)"') DO SET NODE_EXE=%%i
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
@@ -100,6 +86,8 @@ dumpbin /DEPENDENTS "%MODULE%"
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 
+IF "%NODE_RUNTIME%"=="electron" GOTO CHECK_ELECTRON_TEST_ERRORLEVEL
+
 ::skipping check for errorlevel npm test result when using io.js
 ::@springmeyer: how to proceed?
 IF NOT "%nodejs_version%"=="1.8.1" IF NOT "%nodejs_version%"=="2.0.0" GOTO CHECK_NPM_TEST_ERRORLEVEL
@@ -109,11 +97,22 @@ CALL npm test
 ECHO ==========================================
 ECHO ==========================================
 ECHO ==========================================
-ECHO using iojs, not checking test result!!!!!!!!!
-ECHO ==========================================
-ECHO ==========================================
-ECHO ==========================================
 
+GOTO NPM_TEST_FINISHED
+
+
+:CHECK_ELECTRON_TEST_ERRORLEVEL
+ECHO installing electron
+CALL npm install -g "electron@%NODE_RUNTIME_VERSION%"
+ECHO installing electron-mocha
+IF "%nodejs_version%" LEQ 6 CALL npm install -g "electron-mocha@7"
+IF "%nodejs_version%" GTR 6 CALL npm install -g "electron-mocha"
+ECHO preparing tests
+CALL electron "test/support/createdb-electron.js"
+DEL "test\support\createdb-electron.js"
+ECHO calling electron-mocha
+CALL electron-mocha -R spec --timeout 480000
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 GOTO NPM_TEST_FINISHED
 
 
@@ -122,38 +121,12 @@ ECHO calling npm test
 CALL npm test
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-ECHO calling electron-rebuild
-CALL .\node_modules\.bin\electron-rebuild --force
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-ECHO calling electron-mocha
-CALL .\node_modules\.bin\electron-mocha --timeout 480000
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
 :NPM_TEST_FINISHED
-
-
+ECHO packaging for node-gyp
 CALL node_modules\.bin\node-pre-gyp package %TOOLSET_ARGS%
 ::make commit message env var shorter
 SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
 IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS%) ELSE (ECHO not publishing)
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-:: Do the same for electron
-CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=1.7.11 --disturl=https://atom.io/download/electron
-SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=1.7.11 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-
-CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron
-SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron
-SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 GOTO DONE

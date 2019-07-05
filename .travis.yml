@@ -19,6 +19,28 @@ matrix:
   include:
      # Linux
      - os: linux
+       dist: trusty
+       compiler: clang
+       env: NODE_VERSION="12"
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5', 'libstdc++-4.9-dev']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="11"
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5', 'libstdc++-4.9-dev']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="10"
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5', 'libstdc++-4.9-dev']
+     - os: linux
        compiler: clang
        env: NODE_VERSION="9"
        addons:
@@ -60,17 +82,10 @@ matrix:
          apt:
             sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
             packages: [ 'clang-3.5']
-     - os: linux
-       compiler: clang
-       env: NODE_VERSION="0.10"
-       addons:
-         apt:
-            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
-            packages: [ 'clang-3.5']
      # test building against external sqlite
      - os: linux
        compiler: clang
-       env: NODE_VERSION="0.10" EXTERNAL_SQLITE=true PUBLISHABLE=false
+       env: NODE_VERSION="8" EXTERNAL_SQLITE=true PUBLISHABLE=false
        addons:
          apt:
             sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
@@ -78,10 +93,16 @@ matrix:
      # OS X
      - os: osx
        compiler: clang
-       env: NODE_VERSION="5" COVERAGE=true PUBLISHABLE=false # node abi 47
+       env: NODE_VERSION="12" # node abi 67
      - os: osx
        compiler: clang
-       env: NODE_VERSION="9" # node abi 58
+       env: NODE_VERSION="11" # node abi 67
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="10" # node abi 64
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="9" # node abi 59
      - os: osx
        compiler: clang
        env: NODE_VERSION="8" # node abi 57
@@ -97,19 +118,99 @@ matrix:
      - os: osx
        compiler: clang
        env: NODE_VERSION="4" # node abi 46
+     # electron Linux
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="12" ELECTRON_VERSION="5.0.0"
+       dist: trusty # needed for libc6 / 'version `GLIBC_2.17` not found' error on precise
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5', 'libstdc++-4.9-dev']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="4.0.0"
+       dist: trusty # needed for libc6 / 'version `GLIBC_2.17` not found' error on precise
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5', 'libstdc++-4.9-dev']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="3.0.6"
+       dist: trusty # needed for libc6 / 'version `GLIBC_2.17` not found' error on precise
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5', 'libstdc++-4.9-dev']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="2.0.1"
+       dist: trusty # needed for libc6 / 'version `GLIBC_2.17` not found' error on precise
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5', 'libc6']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="1.8.4"
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="1.7.12"
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="1.6.2"
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5']
+     - os: linux
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="1.3.14"
+       addons:
+         apt:
+            sources: [ 'ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5', 'gcc-multilib', 'g++-multilib', 'libsqlite3-dev:i386' ]
+            packages: [ 'clang-3.5']
+     # electron MacOs
      - os: osx
        compiler: clang
-       env: NODE_VERSION="0.10" # node abi 11
+       env: NODE_VERSION="6" ELECTRON_VERSION="5.0.0"
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="4.0.0"
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="3.0.6"
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="2.0.1"
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="1.8.4"
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="1.7.12"
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="1.6.2"
+     - os: osx
+       compiler: clang
+       env: NODE_VERSION="6" ELECTRON_VERSION="1.3.14"
 
 env:
   global:
     - JOBS: "8"
-    - secure: PifMOSnn+mWR1RUptXse+fLvWiTrzg0R/mazO7RWhXHWBKv0uAJ/qV3dI0GIRBLtjG10Iy+tT5RNh1TIbBzB9Y67wMcGvylUPG1+3EOKoBMEPnOD9AgCEQw4SOXfGPx0cq2N6ueSKieCgu1yKN9Wq7XCbE+zTk/DiRNIdLirVoo=
-    - secure: cc4esJY1vPXL31IeumAJoKWDDO2BTGFiltwfO1jbTbiV7QT911QUjTUasxXIVpOaHNCpxSTyevPwwTWfzt2EtF92Lli+qhQ2bbzMiDSBZstSrHdAe62Ai2M1oYYUwk/0cABB/2nO9uRyYwITCxpTSNzZBrYhn3C29WqBhPeVDmM=
 
 before_install:
 - export PUBLISHABLE=${PUBLISHABLE:-true}
-- export COVERAGE=${COVERAGE:-false}
 - if [[ $(uname -s) == 'Linux' ]]; then
     export CXX="clang++-3.5";
     export CC="clang-3.5";
@@ -127,16 +228,15 @@ install:
 before_script:
 # get commit message
 - export COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
-- if [[ ${COVERAGE} == true ]]; then
-     if [[ $(uname -s) == 'Linux' ]]; then
-       PYTHONUSERBASE=$(pwd)/py-local pip install --user cpp-coveralls;
-     else
-       PYTHONUSERBASE=$(pwd)/py-local easy_install --user cpp-coveralls;
-     fi;
-   fi
 
 script:
-- if [[ "${NODE_VERSION}" ]]; then ./scripts/build_against_node.sh; fi;
+- if [[ "${NODE_VERSION}" ]]; then
+    if [[ "${ELECTRON_VERSION}" ]]; then
+      ./scripts/build_against_electron.sh;
+    else
+      ./scripts/build_against_node.sh;
+    fi;
+  fi
 - if [[ "${NODE_VERSION}" -eq "4" ]]; then ./node_modules/.bin/eslint lib; fi;
 # disabled for now: need to port to sudo:false
 #- if [[ "${NODE_WEBKIT}" ]]; then ./scripts/build_against_node_webkit.sh; fi;

@@ -4,7 +4,10 @@ While the `node-sqlite3` project does include support for compiling against sqlc
 
 ## Supported platforms
 
-Tested on Node v8.x and Electron 1.7.9, on Windows, Mac and Linux.
+Tests are run and pre-built binaries are made available for the following platforms:
+* Node 8, 10 and 12.
+* Electron 3, 4 and 5.
+* Windows, Mac and Linux.
 
 # Requirements
 
@@ -15,7 +18,7 @@ Tested on Node v8.x and Electron 1.7.9, on Windows, Mac and Linux.
 
 ### Mac
 
- * `brew install openssl`
+ * `brew install openssl@1.1`
 
 # Installation
 
@@ -33,6 +36,9 @@ var sqlite3 = require('@journeyapps/sqlcipher').verbose();
 var db = new sqlite3.Database('test.db');
 
 db.serialize(function() {
+  // Required to open a database created with SQLCipher 3.x
+  db.run("PRAGMA cipher_compatibility = 3");
+
   db.run("PRAGMA key = 'mysecret'");
   db.run("CREATE TABLE lorem (info TEXT)");
 
@@ -52,7 +58,7 @@ db.close();
 
 # SQLCipher
 
-A copy of the source for SQLCipher 4.0.1 is bundled, which is based on SQLite 3.26.0.
+A copy of the source for SQLCipher 4.2.0 is bundled, which is based on SQLite 3.28.0.
 
 ## OpenSSL
 
@@ -68,13 +74,15 @@ On Linux we dynamically link against the system OpenSSL.
 
 See the [API documentation](https://github.com/mapbox/node-sqlite3/wiki) in the wiki.
 
+Documentation for the SQLCipher extension is available [here](https://www.zetetic.net/sqlcipher/sqlcipher-api/).
+
 # Testing
 
 [mocha](https://github.com/visionmedia/mocha) is required to run unit tests.
 
 In sqlite3's directory (where its `package.json` resides) run the following:
 
-    npm install mocha
+    npm install --build-from-source
     npm test
 
 # Publishing
@@ -94,4 +102,8 @@ Additionally, some of the SQLCipher-related changes are based on a fork by [liub
 
 # License
 
-`node-sqlcipher` is [BSD licensed](https://github.com/mapbox/node-sqlite3/raw/master/LICENSE).
+`node-sqlcipher` is [BSD licensed](./LICENSE).
+
+`SQLCipher` is `Copyright (c) 2016, ZETETIC LLC` under the [BSD license](https://github.com/sqlcipher/sqlcipher/blob/master/LICENSE).
+
+`SQLite` is Public Domain
