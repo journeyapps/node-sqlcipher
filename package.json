@@ -1,7 +1,7 @@
 {
   "name": "@journeyapps/sqlcipher",
   "description": "Asynchronous, non-blocking SQLCipher bindings",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "homepage": "http://github.com/journeyapps/node-sqlcipher",
   "author": {
     "name": "JourneyApps",
@@ -43,9 +43,9 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.251.1",
-    "electron": "^2.0.13",
+    "electron": "^5.0.6",
     "electron-mocha": "^5.0.0",
-    "electron-rebuild": "^1.8.1",
+    "electron-rebuild": "^1.8.5",
     "eslint": "3.5.0",
     "mocha": "^5.2.0"
   },

@@ -156,6 +156,11 @@ SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
 IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
+CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
+SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
+IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
 GOTO DONE
 
 

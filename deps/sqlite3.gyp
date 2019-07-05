@@ -60,7 +60,7 @@
       },
       'OS == "mac"', {
         'variables': {
-          'openssl_root%': '/usr/local/opt/openssl'
+          'openssl_root%': '/usr/local/opt/openssl@1.1'
         },
         'link_settings': {
           'libraries': [
