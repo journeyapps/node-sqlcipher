@@ -81,57 +81,84 @@ aliases:
 
 version: 2
 jobs:
+  build-12.6.0:
+    <<: *common-build
+    docker:
+      - image: circleci/node:12.6.0
+
   build-10.16.0:
     <<: *common-build
     docker:
       - image: circleci/node:10.16.0
 
-
-  build-8.15.1:
+  build-8.16.0:
     <<: *common-build
     docker:
-      - image: circleci/node:8.15.1
-
+      - image: circleci/node:8.16.0
 
   build-electron-5.0.6:
     <<: *common-electron-linux
     environment:
       PRE_GYP_ARGS: --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
 
-  build-electron-2.0.4:
+  build-electron-4.2.6:
     <<: *common-electron-linux
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron
+      PRE_GYP_ARGS: --runtime=electron --target=4.2.6 --disturl=https://atom.io/download/electron
 
-  build-electron-1.8.6:
+  build-electron-3.1.11:
     <<: *common-electron-linux
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron
+      PRE_GYP_ARGS: --runtime=electron --target=3.1.11 --disturl=https://atom.io/download/electron
 
-  build-electron-1.7.11:
+  build-electron-2.0.18:
     <<: *common-electron-linux
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=1.7.9 --disturl=https://atom.io/download/electron
+      PRE_GYP_ARGS: --runtime=electron --target=2.0.18 --disturl=https://atom.io/download/electron
 
-
-  build-macos-10.16.0:
+  build-macos-12.6.0:
     <<: *common-macos
     environment:
       NODE_VERSION: "12.6.0"
 
+  build-macos-10.16.0:
+    <<: *common-macos
+    environment:
+      NODE_VERSION: "10.16.0"
 
   build-macos-electron-5.0.6:
     <<: *common-macos
     environment:
       PRE_GYP_ARGS: --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
-      NODE_VERSION: "12.6.0"
+      NODE_VERSION: "10.16.0"
+
+  build-macos-electron-4.2.6:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=4.2.6 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
+
+  build-macos-electron-3.1.11:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=3.1.11 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
 
 workflows:
   version: 2
   build_all:
     jobs:
+      - build-12.6.0
       - build-10.16.0
-      - build-8.15.1
+      - build-8.16.0
       - build-electron-5.0.6
+      - build-electron-4.2.6
+      - build-electron-3.1.11
+      - build-electron-2.0.18
+      - build-electron-5.0.6
+      - build-macos-12.6.0
       - build-macos-10.16.0
+      - build-macos-8.16.0
       - build-macos-electron-5.0.6
+      - build-macos-electron-4.2.6
+      - build-macos-electron-3.1.11

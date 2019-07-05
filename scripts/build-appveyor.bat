@@ -38,8 +38,6 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 powershell Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-:SKIP_APPVEYOR_INSTALL
-
 ECHO available node.exe^:
 call where node
 ECHO available npm^:
@@ -123,42 +121,12 @@ ECHO calling npm test
 CALL npm test
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-ECHO calling electron-rebuild
-CALL .\node_modules\.bin\electron-rebuild --force
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-ECHO calling electron-mocha
-CALL .\node_modules\.bin\electron-mocha --timeout 480000
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
 :NPM_TEST_FINISHED
 ECHO packaging for node-gyp
 CALL node_modules\.bin\node-pre-gyp package %TOOLSET_ARGS%
 ::make commit message env var shorter
 SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
 IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS%) ELSE (ECHO not publishing)
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-:: Do the same for electron
-CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=1.7.11 --disturl=https://atom.io/download/electron
-SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=1.7.11 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-
-CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron
-SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron
-SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=2.0.4 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-CALL node_modules\.bin\node-pre-gyp rebuild package %TOOLSET_ARGS% --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
-SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS% --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron) ELSE (ECHO not publishing)
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 GOTO DONE
