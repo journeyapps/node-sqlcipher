@@ -99,6 +99,22 @@ jobs:
     docker:
       - image: circleci/node:8.16.0
 
+  build-electron-8.1.1:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=8.1.1 --disturl=https://atom.io/download/electron
+
+  build-electron-7.1.14:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=7.1.14 --disturl=https://atom.io/download/electron
+
+  build-electron-6.1.9:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=6.1.9 --disturl=https://atom.io/download/electron
+
+
   build-electron-5.0.6:
     <<: *common-electron-linux
     environment:
@@ -188,6 +204,9 @@ workflows:
       - build-macos-12.6.0
       - build-macos-10.16.0
       - build-macos-8.16.0
+      - build-macos-electron-8.1.1
+      - build-macos-electron-7.1.14
+      - build-macos-electron-6.1.9
       - build-macos-electron-5.0.6
       - build-macos-electron-4.2.6
       - build-macos-electron-3.1.11
