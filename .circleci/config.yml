@@ -131,6 +131,24 @@ jobs:
     environment:
       NODE_VERSION: "8.16.0"
 
+  build-macos-electron-8.1.1:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=8.1.1 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
+
+  build-macos-electron-7.1.14:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=7.1.14 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
+
+  build-macos-electron-6.1.9:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=6.1.9 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
+
   build-macos-electron-5.0.6:
     <<: *common-macos
     environment:
@@ -156,6 +174,9 @@ workflows:
       - build-12.6.0
       - build-10.16.0
       - build-8.16.0
+      - build-electron-8.1.1
+      - build-electron-7.1.14
+      - build-electron-6.1.9
       - build-electron-5.0.6
       - build-electron-4.2.6
       - build-electron-3.1.11
