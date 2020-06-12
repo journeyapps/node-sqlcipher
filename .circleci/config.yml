@@ -12,6 +12,7 @@ aliases:
       fi
 
   - &common-build
+    resource_class: large
     working_directory: ~/repo
     steps:
       - checkout
@@ -25,6 +26,7 @@ aliases:
 
 
   - &common-electron-linux
+    resource_class: large
     docker:
       - image: circleci/node:10.16.0
 
@@ -44,6 +46,7 @@ aliases:
       - run: *publish-command
 
   - &common-macos
+    resource_class: large
     macos:
       xcode: "10.2.1"
     steps:
@@ -96,6 +99,22 @@ jobs:
     docker:
       - image: circleci/node:8.16.0
 
+  build-electron-8.1.1:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=8.1.1 --disturl=https://atom.io/download/electron
+
+  build-electron-7.1.14:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=7.1.14 --disturl=https://atom.io/download/electron
+
+  build-electron-6.1.9:
+    <<: *common-electron-linux
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=6.1.9 --disturl=https://atom.io/download/electron
+
+
   build-electron-5.0.6:
     <<: *common-electron-linux
     environment:
@@ -126,10 +145,23 @@ jobs:
     environment:
       NODE_VERSION: "10.16.0"
 
-  build-macos-8.16.0:
+  build-macos-electron-8.1.1:
     <<: *common-macos
     environment:
-      NODE_VERSION: "8.16.0"
+      PRE_GYP_ARGS: --runtime=electron --target=8.1.1 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
+
+  build-macos-electron-7.1.14:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=7.1.14 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
+
+  build-macos-electron-6.1.9:
+    <<: *common-macos
+    environment:
+      PRE_GYP_ARGS: --runtime=electron --target=6.1.9 --disturl=https://atom.io/download/electron
+      NODE_VERSION: "10.16.0"
 
   build-macos-electron-5.0.6:
     <<: *common-macos
@@ -156,6 +188,9 @@ workflows:
       - build-12.6.0
       - build-10.16.0
       - build-8.16.0
+      - build-electron-8.1.1
+      - build-electron-7.1.14
+      - build-electron-6.1.9
       - build-electron-5.0.6
       - build-electron-4.2.6
       - build-electron-3.1.11
@@ -163,7 +198,9 @@ workflows:
       - build-electron-5.0.6
       - build-macos-12.6.0
       - build-macos-10.16.0
-      - build-macos-8.16.0
+      - build-macos-electron-8.1.1
+      - build-macos-electron-7.1.14
+      - build-macos-electron-6.1.9
       - build-macos-electron-5.0.6
       - build-macos-electron-4.2.6
       - build-macos-electron-3.1.11
