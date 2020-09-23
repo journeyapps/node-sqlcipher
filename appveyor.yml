@@ -1,9 +1,5 @@
 environment:
   matrix:
-    - nodejs_version: 8
-      platform: x64
-    - nodejs_version: 8
-      platform: x86
     - nodejs_version: 10
       platform: x64
     - nodejs_version: 10
@@ -11,40 +7,98 @@ environment:
     - nodejs_version: 12
       platform: x64
     - nodejs_version: 12
+      platform: x86
+    - nodejs_version: 13
+      platform: x64
+    - nodejs_version: 13
+      platform: x86
+    - nodejs_version: 14
+      platform: x64
+    - nodejs_version: 14
       platform: x86
     # electron
-    - nodejs_version: 10
+    - nodejs_version: 12.13.0
       platform: x64
       NODE_RUNTIME: electron
-      NODE_RUNTIME_VERSION: 8.1.1
-      TOOLSET_ARGS: --dist-url=https://atom.io/download/electron
-    - nodejs_version: 10
+      NODE_RUNTIME_VERSION: 8.2.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.13.0
       platform: x86
       NODE_RUNTIME: electron
-      NODE_RUNTIME_VERSION: 8.1.1
-      TOOLSET_ARGS: --dist-url=https://atom.io/download/electron
-    - nodejs_version: 10
+      NODE_RUNTIME_VERSION: 8.2.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.13.0
       platform: x64
       NODE_RUNTIME: electron
-      NODE_RUNTIME_VERSION: 7.1.14
-      TOOLSET_ARGS: --dist-url=https://atom.io/download/electron
-    - nodejs_version: 10
+      NODE_RUNTIME_VERSION: 8.1.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.13.0
       platform: x86
       NODE_RUNTIME: electron
-      NODE_RUNTIME_VERSION: 7.1.14
-      TOOLSET_ARGS: --dist-url=https://atom.io/download/electron
-    - nodejs_version: 10
+      NODE_RUNTIME_VERSION: 8.1.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.13.0
       platform: x64
       NODE_RUNTIME: electron
-      NODE_RUNTIME_VERSION: 6.1.9
-      TOOLSET_ARGS: --dist-url=https://atom.io/download/electron
-    - nodejs_version: 10
+      NODE_RUNTIME_VERSION: 8.0.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.13.0
       platform: x86
       NODE_RUNTIME: electron
-      NODE_RUNTIME_VERSION: 6.1.9
-      TOOLSET_ARGS: --dist-url=https://atom.io/download/electron
+      NODE_RUNTIME_VERSION: 8.0.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.8.1
+      platform: x64
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 7.2.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.8.1
+      platform: x86
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 7.2.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.8.1
+      platform: x64
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 7.1.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.8.1
+      platform: x86
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 7.1.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.8.1
+      platform: x64
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 7.0.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.8.1
+      platform: x86
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 7.0.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.4.0
+      platform: x64
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 6.1.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.4.0
+      platform: x86
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 6.1.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.4.0
+      platform: x64
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 6.0.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
+    - nodejs_version: 12.4.0
+      platform: x86
+      NODE_RUNTIME: electron
+      NODE_RUNTIME_VERSION: 6.0.0
+      TOOLSET_ARGS: --dist-url=https://electronjs.org/headers
 
-os: Visual Studio 2015
+image: Visual Studio 2017
 
 
 install:

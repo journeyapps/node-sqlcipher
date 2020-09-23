@@ -1,5 +1,10 @@
 {
   'includes': [ 'common-sqlite.gypi' ],
+
+  'variables': {
+    'sqlite_magic%': '',
+  },
+
   'target_defaults': {
     'default_configuration': 'Release',
     'cflags':[
@@ -163,7 +168,8 @@
           'SQLITE_ENABLE_RTREE',
           'SQLITE_HAS_CODEC',
           'SQLITE_TEMP_STORE=2',
-          'SQLITE_SECURE_DELETE'
+          'SQLITE_SECURE_DELETE',
+          'SQLITE_ENABLE_DBSTAT_VTAB=1'
         ],
       },
       'cflags_cc': [
@@ -179,11 +185,19 @@
         'SQLITE_ENABLE_RTREE',
         'SQLITE_HAS_CODEC',
         'SQLITE_TEMP_STORE=2',
-        'SQLITE_SECURE_DELETE'
+        'SQLITE_SECURE_DELETE',
+        'SQLITE_ENABLE_DBSTAT_VTAB=1'
       ],
       'export_dependent_settings': [
         'action_before_build',
-      ]
+      ],
+      'conditions': [
+        ["sqlite_magic != ''", {
+            'defines': [
+              'SQLITE_FILE_HEADER="<(sqlite_magic)"'
+            ]
+        }]
+      ],
     }
   ]
 }

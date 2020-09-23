@@ -4,25 +4,22 @@ SET EL=0
 
 ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %~f0 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-IF /I "%msvs_toolset%"=="" ECHO msvs_toolset unset, defaulting to 14 && SET msvs_toolset=14
-IF /I "%msvs_version%"=="" ECHO msvs_version unset, defaulting to 2015 && SET msvs_version=2015
+IF /I "%msvs_version%"=="" ECHO msvs_version unset, defaulting to 2017 && SET msvs_version=2017
 
 SET PATH=%CD%;%PATH%
-IF "%msvs_toolset%"=="12" SET msvs_version=2013
 IF NOT "%NODE_RUNTIME%"=="" SET "TOOLSET_ARGS=%TOOLSET_ARGS% --runtime=%NODE_RUNTIME%"
 IF NOT "%NODE_RUNTIME_VERSION%"=="" SET "TOOLSET_ARGS=%TOOLSET_ARGS% --target=%NODE_RUNTIME_VERSION%"
 
 ECHO APPVEYOR^: %APPVEYOR%
 ECHO nodejs_version^: %nodejs_version%
 ECHO platform^: %platform%
-ECHO msvs_toolset^: %msvs_toolset%
 ECHO msvs_version^: %msvs_version%
 ECHO TOOLSET_ARGS^: %TOOLSET_ARGS%
 
 ECHO activating VS command prompt
 :: NOTE this call makes the x64 -> X64
-IF /I "%platform%"=="x64" ECHO x64 && CALL "C:\Program Files (x86)\Microsoft Visual Studio %msvs_toolset%.0\VC\vcvarsall.bat" amd64
-IF /I "%platform%"=="x86" ECHO x86 && CALL "C:\Program Files (x86)\Microsoft Visual Studio %msvs_toolset%.0\VC\vcvarsall.bat" x86
+IF /I "%platform%"=="x64" ECHO x64 && CALL "C:\Program Files (x86)\Microsoft Visual Studio\%msvs_version%\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+IF /I "%platform%"=="x86" ECHO x86 && CALL "C:\Program Files (x86)\Microsoft Visual Studio\%msvs_version%\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ECHO using compiler^: && CALL cl
@@ -33,9 +30,6 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ECHO downloading/installing node
 powershell Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:PLATFORM
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
-powershell Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ECHO available node.exe^:
@@ -71,6 +65,30 @@ IF "%nodejs_version:~0,1%"=="4" CALL npm install node-gyp@3.x
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 IF "%nodejs_version:~0,1%"=="5" CALL npm install node-gyp@3.x
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+::Need to force update node-gyp to v6+ for electron v6 and v5
+ECHO ===== conditional node-gyp upgrade START ============
+:: Find the folder to install the node-gyp in
+SET npm_in_nodejs_dir="%ProgramFiles%\nodejs\node_modules\npm"
+ECHO npm_in_nodejs_dir^: %npm_in_nodejs_dir%
+IF /I "%platform%"=="x86" SET npm_in_nodejs_dir="%ProgramFiles(x86)%\nodejs\node_modules\npm"
+ECHO npm_in_nodejs_dir^: %npm_in_nodejs_dir%
+:: Set boolean whether the update has to happen
+SET "needs_patch="
+IF DEFINED NODE_RUNTIME_VERSION (
+  ECHO NODE_RUNTIME_VERSION_REDUCED^: %NODE_RUNTIME_VERSION:~0,1%
+  IF "%NODE_RUNTIME_VERSION:~0,1%"=="1" SET "needs_patch=y"
+  IF "%NODE_RUNTIME_VERSION:~0,1%"=="2" SET "needs_patch=y"
+  IF "%NODE_RUNTIME_VERSION:~0,1%"=="3" SET "needs_patch=y"
+  IF "%NODE_RUNTIME_VERSION:~0,1%"=="4" SET "needs_patch=y"
+  IF "%NODE_RUNTIME_VERSION:~0,1%"=="5" SET "needs_patch=y"
+  IF "%NODE_RUNTIME_VERSION:~0,1%"=="6" SET "needs_patch=y"
+)
+:: Check if electron and install
+ECHO NODE_RUNTIME^: %NODE_RUNTIME%
+IF DEFINED needs_patch CALL npm install --prefix %npm_in_nodejs_dir% node-gyp@6.x
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+ECHO ===== conditional node-gyp upgrade END ============
 
 CALL npm install --build-from-source --msvs_version=%msvs_version% %TOOLSET_ARGS% --loglevel=http
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
