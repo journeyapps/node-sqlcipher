@@ -8,7 +8,7 @@ aliases:
       fi
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
       ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
-      if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]]; then
+      if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
         ./node_modules/.bin/node-pre-gyp package testpackage $GYP_ARGS
         ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
       else
@@ -125,6 +125,8 @@ version: 2
 jobs:
   build-14.11.0:
     <<: *common-build
+    environment:
+      PUBLISH: true
     docker:
       - image: circleci/node:14.11.0
 
@@ -178,6 +180,7 @@ jobs:
   build-macos-14.11.0:
     <<: *common-macos
     environment:
+      PUBLISH: true
       NODE_VERSION: "14.11.0"
 
   build-macos-12.6.0:
