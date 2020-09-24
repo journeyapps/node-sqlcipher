@@ -163,10 +163,10 @@ aliases:
           name: Install
           command: npm install --build-from-source
       - run: npm run test
-      - store_artifacts:
-          path: c:\\project\\lib\\binding
       - run:
           <<: *publish-command-windows
+      - store_artifacts:
+          path: c:\\project\\lib\\binding
 # These tests pass, but exit with code 1 on Windows. Disable for now
 #      - run:
 #          name: Test Electron
@@ -277,16 +277,17 @@ jobs:
       # Issues with 12.4.0
       NODE_VERSION: "12.6.0"
 
+  # Node 14 - build NAPI 3 and 6
   windows-14_x86:
     <<: *common-windows
     environment:
-      NODE_VERSION: 14.11.0
+      NODE_VERSION: "14.11.0"
       NODE_ARCH: x86
 
   windows-14_x64:
     <<: *common-windows
     environment:
-      NODE_VERSION: 14.11.0
+      NODE_VERSION: "14.11.0"
       NODE_ARCH: x64
 
 workflows:
