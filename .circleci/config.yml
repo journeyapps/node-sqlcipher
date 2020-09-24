@@ -55,7 +55,6 @@ aliases:
       - run: *publish-command
 
   - &common-macos
-    resource_class: large
     macos:
       xcode: "10.2.1"
     steps:
@@ -90,7 +89,6 @@ aliases:
           <<: *publish-command
 
   - &common-electron-macos
-    resource_class: large
     macos:
       xcode: "10.2.1"
     steps:
@@ -126,6 +124,50 @@ aliases:
       - run:
           <<: *publish-command
 
+  - &common-windows
+    working_directory: c:\\project
+    executor:
+      name: win/default
+    environment:
+      GPG_VERSION: 2.3.4
+      # Set in individual builds:
+      # NODE_VERSION: 12.6.0
+      # NODE_ARCH: x86
+
+      PRE_GYP_ARGS: --runtime=electron --target=10.1.2 --dist-url=https://electronjs.org/headers
+      NODE_RUNTIME: electron
+    steps:
+      - checkout
+      - run:
+          name: Setup
+          command: |
+            $ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';
+            cd \tmp
+            Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-{1}.zip' -f $env:NODE_VERSION,$env:NODE_ARCH) -OutFile 'node.zip' -UseBasicParsing
+            Expand-Archive node.zip -DestinationPath C:\
+            Rename-Item -Path $('C:\node-v{0}-win-{1}' -f $env:NODE_VERSION,$env:NODE_ARCH) -NewName 'C:\nodejs'
+
+            $env:PATH = 'C:\nodejs;{0}' -f $env:PATH
+            [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+            npm --vs2015 install --global windows-build-tools
+
+            node -v
+      - run:
+          name: Install
+          command: npm install --build-from-source $env:PRE_GYP_ARGS.split()
+      - run: npm run test
+      - store_artifacts:
+          path: c:\\project\\lib\\binding
+      - run:
+          <<: *publish-command
+          shell: bash.exe
+
+      - run:
+          name: Test Electron
+          command: |
+            ./node_modules/.bin/electron "test/support/createdb-electron.js"
+            ./node_modules/.bin/electron-mocha --timeout 480000
 jobs:
   build-14:
     <<: *common-build
@@ -230,52 +272,23 @@ jobs:
       # Issues with 12.4.0
       NODE_VERSION: "12.6.0"
 
-  windows-12_x86:
-    working_directory: c:\\project
-    executor:
-      name: win/default
-      # shell: powershell.exe -ExecutionPolicy Bypass -Command "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"
+  windows-14_x86:
+    <<: *common-windows
     environment:
-      GPG_VERSION: 2.3.4
-      NODE_VERSION: 12.6.0
-      YARN_VERSION: 1.16.0
+      NODE_VERSION: 14.11.0
+      NODE_ARCH: x86
 
-      PRE_GYP_ARGS: --runtime=electron --target=10.1.2 --dist-url=https://electronjs.org/headers
-      NODE_RUNTIME: electron
-
-    steps:
-      - checkout
-      - run:
-          name: Setup
-          command: |
-            $ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';
-            cd \tmp
-            Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x86.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing
-            Expand-Archive node.zip -DestinationPath C:\
-            Rename-Item -Path $('C:\node-v{0}-win-x86' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
-
-            $env:PATH = 'C:\nodejs;{0}' -f $env:PATH
-            [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
-
-            npm --vs2015 install --global windows-build-tools
-
-            node -v
-      - run:
-          name: Install
-          command: npm install --build-from-source $env:PRE_GYP_ARGS.split()
-      - store_artifacts:
-          path: c:\\project\\lib\\binding
-      - run:
-          name: Test Electron
-          command: |
-            ./node_modules/.bin/electron "test/support/createdb-electron.js"
-            ./node_modules/.bin/electron-mocha --timeout 480000
+  windows-14_x64:
+    <<: *common-windows
+    environment:
+      NODE_VERSION: 14.11.0
+      NODE_ARCH: x64
 
 workflows:
   version: 2
   build_all:
     jobs:
-#      - build-14
+      - build-14
 #      - build-12
 #      - build-10
 #      - build-electron-10
@@ -291,4 +304,5 @@ workflows:
 #      - build-macos-electron-8
 #      - build-macos-electron-7
 #      - build-macos-electron-6
-      - windows-12_x86
+      - windows-14_x86
+      - windows-14_x64
