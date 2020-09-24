@@ -128,14 +128,6 @@ aliases:
     working_directory: c:\\project
     executor:
       name: win/default
-    environment:
-      GPG_VERSION: 2.3.4
-      # Set in individual builds:
-      # NODE_VERSION: 12.6.0
-      # NODE_ARCH: x86
-
-      PRE_GYP_ARGS: --runtime=electron --target=10.1.2 --dist-url=https://electronjs.org/headers
-      NODE_RUNTIME: electron
     steps:
       - checkout
       - run:
@@ -150,19 +142,18 @@ aliases:
             $env:PATH = 'C:\nodejs;{0}' -f $env:PATH
             [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
 
-            npm --vs2015 install --global windows-build-tools
+            # npm --vs2015 install --global windows-build-tools
 
             node -v
       - run:
           name: Install
-          command: npm install --build-from-source $env:PRE_GYP_ARGS.split()
+          command: npm install --build-from-source
       - run: npm run test
       - store_artifacts:
           path: c:\\project\\lib\\binding
       - run:
           <<: *publish-command
           shell: bash.exe
-
       - run:
           name: Test Electron
           command: |
