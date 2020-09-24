@@ -283,32 +283,34 @@ jobs:
     environment:
       NODE_VERSION: "14.11.0"
       NODE_ARCH: x86
+      PUBLISH: true
 
   windows-14_x64:
     <<: *common-windows
     environment:
       NODE_VERSION: "14.11.0"
       NODE_ARCH: x64
+      PUBLISH: true
 
 workflows:
   version: 2
   build_all:
     jobs:
       - build-14
-#      - build-12
-#      - build-10
-#      - build-electron-10
-#      - build-electron-9
-#      - build-electron-8
-#      - build-electron-7
-#      - build-electron-6
-#      - build-macos-14
-#      - build-macos-12
-#      - build-macos-10
-#      - build-macos-electron-10
-#      - build-macos-electron-9
-#      - build-macos-electron-8
-#      - build-macos-electron-7
-#      - build-macos-electron-6
+      - build-12
+      - build-10
+      - build-electron-10
+      - build-electron-9
+      - build-electron-8
+      - build-electron-7
+      - build-electron-6
+      - build-macos-14
+      - build-macos-12
+      - build-macos-10
+      - build-macos-electron-10
+      - build-macos-electron-9
+      - build-macos-electron-8
+      - build-macos-electron-7
+      - build-macos-electron-6
       - windows-14_x86
       - windows-14_x64
