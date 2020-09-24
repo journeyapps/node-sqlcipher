@@ -2,11 +2,15 @@ aliases:
   - &publish-command
     name: Publish
     command: |
+      GYP_ARGS=""
+      if [[ "${ELECTRON_VERSION}" ]]; then
+        GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
+      fi
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
-      ./node_modules/.bin/node-pre-gyp rebuild package testpackage $PRE_GYP_ARGS
-      if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]]; then
-        ./node_modules/.bin/node-pre-gyp package testpackage $PRE_GYP_ARGS
-        ./node_modules/.bin/node-pre-gyp publish $PRE_GYP_ARGS
+      ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
+      if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
+        ./node_modules/.bin/node-pre-gyp package testpackage $GYP_ARGS
+        ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
       else
         echo "Not a tagged build - not publishing"
       fi
@@ -28,7 +32,7 @@ aliases:
   - &common-electron-linux
     resource_class: large
     docker:
-      - image: circleci/node:10.16.0
+      - image: circleci/node:12.18.4
 
     working_directory: ~/repo
 
@@ -40,7 +44,7 @@ aliases:
       # These are required for electron(-mocha)
       - run: sudo apt-get install -y libgtk2.0-0 libgtk-3-dev libxtst6 libxss1 libgconf2-4 libnss3 libasound2
       - run: npm install --build-from-source
-      - run: ./node_modules/.bin/electron-rebuild
+      - run: ./node_modules/.bin/electron-rebuild --version=$ELECTRON_VERSION --dist-url=https://electronjs.org/headers
       - run: npm run pretest
       - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
       - run: *publish-command
@@ -77,13 +81,55 @@ aliases:
             npm install --build-from-source
 
       - run: npm run test
-      - run: ./node_modules/.bin/electron-rebuild
+      - run:
+          <<: *publish-command
+
+  - &common-electron-macos
+    resource_class: large
+    macos:
+      xcode: "10.2.1"
+    steps:
+      - checkout
+      - run: |
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          brew install git-lfs openssl@1.1 || true
+      - run: git lfs install
+      - run: git lfs pull
+      - run:
+          name: Install Node
+          command: |
+            source ~/.bash_profile
+
+            # Install the correct Node version
+            curl --silent -o node.tar.xz https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-darwin-x64.tar.xz
+            tar xf node.tar.xz
+            echo 'export NODE_PATH=$HOME/node' >> $BASH_ENV
+            echo 'export PATH=$NODE_PATH/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+            mv node-v$NODE_VERSION-darwin-x64 $NODE_PATH
+            node -v
+
+      - run:
+          name: Install & Build
+          command: |
+            node -v
+            npm install --build-from-source
+
+      - run: ./node_modules/.bin/electron-rebuild --version=$ELECTRON_VERSION --dist-url=https://electronjs.org/headers
+      - run: npm run pretest
       - run: ./node_modules/.bin/electron-mocha --timeout 480000
       - run:
           <<: *publish-command
 
 version: 2
 jobs:
+  build-14.11.0:
+    <<: *common-build
+    environment:
+      PUBLISH: true
+    docker:
+      - image: circleci/node:14.11.0
+
   build-12.6.0:
     <<: *common-build
     docker:
@@ -94,46 +140,48 @@ jobs:
     docker:
       - image: circleci/node:10.16.0
 
-  build-8.16.0:
-    <<: *common-build
-    docker:
-      - image: circleci/node:8.16.0
-
-  build-electron-8.1.1:
+  # Node version should match electron's node version.
+  # See https://github.com/mapbox/node-sqlite3/pull/1367
+  build-electron-10.1.2:
     <<: *common-electron-linux
+    docker:
+      - image: circleci/node:12.16.3
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=8.1.1 --disturl=https://atom.io/download/electron
+      ELECTRON_VERSION: "10.1.2"
+
+  build-electron-9.3.1:
+    <<: *common-electron-linux
+    docker:
+      - image: circleci/node:12.14.1
+    environment:
+      ELECTRON_VERSION: "9.3.1"
+
+  build-electron-8.5.2:
+    <<: *common-electron-linux
+    docker:
+      - image: circleci/node:12.13.0
+    environment:
+      ELECTRON_VERSION: "8.5.2"
 
   build-electron-7.1.14:
     <<: *common-electron-linux
+    docker:
+      - image: circleci/node:12.8.1
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=7.1.14 --disturl=https://atom.io/download/electron
+      ELECTRON_VERSION: "7.1.14"
 
   build-electron-6.1.9:
     <<: *common-electron-linux
+    docker:
+      - image: circleci/node:12.6.0 # Issues with 12.4.0
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=6.1.9 --disturl=https://atom.io/download/electron
+      ELECTRON_VERSION: "6.1.9"
 
-
-  build-electron-5.0.6:
-    <<: *common-electron-linux
+  build-macos-14.11.0:
+    <<: *common-macos
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
-
-  build-electron-4.2.6:
-    <<: *common-electron-linux
-    environment:
-      PRE_GYP_ARGS: --runtime=electron --target=4.2.6 --disturl=https://atom.io/download/electron
-
-  build-electron-3.1.11:
-    <<: *common-electron-linux
-    environment:
-      PRE_GYP_ARGS: --runtime=electron --target=3.1.11 --disturl=https://atom.io/download/electron
-
-  build-electron-2.0.18:
-    <<: *common-electron-linux
-    environment:
-      PRE_GYP_ARGS: --runtime=electron --target=2.0.18 --disturl=https://atom.io/download/electron
+      PUBLISH: true
+      NODE_VERSION: "14.11.0"
 
   build-macos-12.6.0:
     <<: *common-macos
@@ -145,62 +193,56 @@ jobs:
     environment:
       NODE_VERSION: "10.16.0"
 
-  build-macos-electron-8.1.1:
-    <<: *common-macos
+  # NODE_VERSION should match electron's node version.
+  # See https://github.com/mapbox/node-sqlite3/pull/1367
+  build-macos-electron-10.1.2:
+    <<: *common-electron-macos
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=8.1.1 --disturl=https://atom.io/download/electron
-      NODE_VERSION: "10.16.0"
+      ELECTRON_VERSION: "10.1.2"
+      NODE_VERSION: "12.16.3"
+
+  build-macos-electron-9.3.1:
+    <<: *common-electron-macos
+    environment:
+      ELECTRON_VERSION: "9.3.1"
+      NODE_VERSION: "12.14.1"
+
+  build-macos-electron-8.5.2:
+    <<: *common-electron-macos
+    environment:
+      ELECTRON_VERSION: "8.5.2"
+      NODE_VERSION: "12.13.0"
 
   build-macos-electron-7.1.14:
-    <<: *common-macos
+    <<: *common-electron-macos
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=7.1.14 --disturl=https://atom.io/download/electron
-      NODE_VERSION: "10.16.0"
+      ELECTRON_VERSION: "7.1.14"
+      NODE_VERSION: "12.8.1"
 
   build-macos-electron-6.1.9:
-    <<: *common-macos
+    <<: *common-electron-macos
     environment:
-      PRE_GYP_ARGS: --runtime=electron --target=6.1.9 --disturl=https://atom.io/download/electron
-      NODE_VERSION: "10.16.0"
-
-  build-macos-electron-5.0.6:
-    <<: *common-macos
-    environment:
-      PRE_GYP_ARGS: --runtime=electron --target=5.0.6 --disturl=https://atom.io/download/electron
-      NODE_VERSION: "10.16.0"
-
-  build-macos-electron-4.2.6:
-    <<: *common-macos
-    environment:
-      PRE_GYP_ARGS: --runtime=electron --target=4.2.6 --disturl=https://atom.io/download/electron
-      NODE_VERSION: "10.16.0"
-
-  build-macos-electron-3.1.11:
-    <<: *common-macos
-    environment:
-      PRE_GYP_ARGS: --runtime=electron --target=3.1.11 --disturl=https://atom.io/download/electron
-      NODE_VERSION: "10.16.0"
+      ELECTRON_VERSION: "6.1.9"
+      # Issues with 12.4.0
+      NODE_VERSION: "12.6.0"
 
 workflows:
   version: 2
   build_all:
     jobs:
+      - build-14.11.0
       - build-12.6.0
       - build-10.16.0
-      - build-8.16.0
-      - build-electron-8.1.1
+      - build-electron-10.1.2
+      - build-electron-9.3.1
+      - build-electron-8.5.2
       - build-electron-7.1.14
       - build-electron-6.1.9
-      - build-electron-5.0.6
-      - build-electron-4.2.6
-      - build-electron-3.1.11
-      - build-electron-2.0.18
-      - build-electron-5.0.6
+      - build-macos-14.11.0
       - build-macos-12.6.0
       - build-macos-10.16.0
-      - build-macos-electron-8.1.1
+      - build-macos-electron-10.1.2
+      - build-macos-electron-9.3.1
+      - build-macos-electron-8.5.2
       - build-macos-electron-7.1.14
       - build-macos-electron-6.1.9
-      - build-macos-electron-5.0.6
-      - build-macos-electron-4.2.6
-      - build-macos-electron-3.1.11

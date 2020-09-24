@@ -96,7 +96,7 @@ Publishing of the prebuilt binaries is performed on CircleCI and AppVeyor.
 
 # Acknowledgments
 
-Most of the work in this library is from the [node-sqlite3](https://github.com/mapbox/node-sqlite3) library by [MapBox](http://mapbox.org/).
+Most of the work in this library is from the [node-sqlite3](https://github.com/mapbox/node-sqlite3) library by [MapBox](https://mapbox.com/).
 
 Additionally, some of the SQLCipher-related changes are based on a fork by [liubiggun](https://github.com/liubiggun/node-sqlite3).
 

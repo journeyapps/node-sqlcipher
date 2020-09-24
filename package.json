@@ -9,10 +9,14 @@
   },
   "binary": {
     "module_name": "node_sqlite3",
-    "module_path": "./lib/binding/{node_abi}-{platform}-{arch}",
+    "module_path": "./lib/binding/napi-v{napi_build_version}-{platform}-{arch}",
     "host": "https://journeyapps-node-binary.s3.amazonaws.com",
     "remote_path": "./{name}/v{version}/{toolset}/",
-    "package_name": "{node_abi}-{platform}-{arch}.tar.gz"
+    "package_name": "napi-v{napi_build_version}-{platform}-{arch}.tar.gz",
+    "napi_versions": [
+      3,
+      6
+    ]
   },
   "contributors": [
     "Konstantin Käfer <mail@kkaefer.com>",
@@ -37,17 +41,17 @@
     "url": "git://github.com/journeyapps/node-sqlcipher.git"
   },
   "dependencies": {
-    "nan": "^2.12.1",
-    "node-pre-gyp": "^0.11.0",
-    "request": "^2.88.2"
+    "node-addon-api": "^3.0.0",
+    "node-pre-gyp": "^0.15.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.641.0",
-    "electron": "^5.0.13",
+    "electron": "^10.1.2",
     "electron-mocha": "^5.0.0",
     "electron-rebuild": "^1.10.1",
     "eslint": "3.5.0",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "node-gyp": "^6.1.0"
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",

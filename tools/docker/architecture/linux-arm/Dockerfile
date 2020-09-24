@@ -1,5 +1,7 @@
 #!/bin/echo docker build . -f
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: ISC
+# Copyright 2019-present Samsung Electronics Co., Ltd. and other contributors
 #{
 # ISC License
 # Copyright (c) 2004-2010 by Internet Systems Consortium, Inc. ("ISC")
@@ -20,8 +22,10 @@
 # OR PERFORMANCE OF THIS SOFTWARE.
 #}
 
-FROM ubuntu:latest
+FROM resin/rpi-raspbian:stretch
 MAINTAINER Philippe Coval (p.coval@samsung.com)
+
+RUN [ "cross-build-start" ]
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL en_US.UTF-8
@@ -55,8 +59,8 @@ RUN echo "#log: ${project}: Setup system" \
   && nvm use ${NODE_VERSION} \
   && sync
 
-ADD . /usr/local/${project}/${project}
-WORKDIR /usr/local/${project}/${project}
+ADD . /usr/local/opt/${project}/src/${project}
+WORKDIR /usr/local/opt/${project}/src/${project}
 RUN echo "#log: ${project}: Preparing sources" \
   && set -x \
   && which npm || . ~/.bashrc \
@@ -65,20 +69,13 @@ RUN echo "#log: ${project}: Preparing sources" \
   && npm install --unsafe-perm --build-from-source \
   && sync
 
-WORKDIR /usr/local/${project}/${project}
+WORKDIR /usr/local/opt/${project}/src/${project}
 RUN echo "#log: ${project}: Building sources" \
   && set -x \
   && which npm || . ~/.bashrc \
   && npm run pack \
   && npm pack \
-  && find build/stage/ -type f \
+  && find ${PWD}/build/stage/ -type f \
   && sync
 
-WORKDIR /usr/local/${project}/${project}
-RUN echo "#log: ${project}: Installing sources" \
-  && set -x \
-  && install -d /usr/local/src/${project}/deploy/ \
-  && install *.tgz /usr/local/src/${project}/deploy/ \
-  && cp -rfva ./build/stage/ /usr/local/src/${project}/deploy/ \
-  && find /usr/local/src/${project}/deploy/ -type f \
-  && sync
+RUN [ "cross-build-end" ]
