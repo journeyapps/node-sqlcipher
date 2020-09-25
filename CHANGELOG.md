@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.1.0
+
+- Update to SQLCipher 4.3.0 / SQLite 3.30.1.
 ## 4.0.0
 
  - Update to SQLCipher 4.2.0 / SQLite 3.28.0.

@@ -4,26 +4,16 @@ While the `node-sqlite3` project does include support for compiling against sqlc
 
 ## Supported platforms
 
-Tests are run and pre-built binaries are made available for the following platforms:
-* Node 8, 10 and 12.
-* Electron 3, 4 and 5.
-* Windows, Mac and Linux.
+Binaries are built against N-API 3 and 6, on MacOS, Windows (ia32 and x64) and Linux (x64).
 
-# Requirements
+Node 10+ and Electron 6+ is supported.
 
-### Windows
-
- * Visual Studio 2015
- * Python 2.7
-
-### Mac
-
- * `brew install openssl@1.1`
+Other platforms/architectures may work by building from source - see the section below.
 
 # Installation
 
 ```sh
-yarn install "@journeyapps/sqlcipher"
+yarn add "@journeyapps/sqlcipher"
 # Or: npm install --save "@journeyapps/sqlcipher"
 ```
 
@@ -36,8 +26,11 @@ var sqlite3 = require('@journeyapps/sqlcipher').verbose();
 var db = new sqlite3.Database('test.db');
 
 db.serialize(function() {
-  // Required to open a database created with SQLCipher 3.x
-  db.run("PRAGMA cipher_compatibility = 3");
+  // This is the default, but it is good to specify explicitly:
+  db.run("PRAGMA cipher_compatibility = 4");
+
+  // To open a database created with SQLCipher 3.x, use this:
+  // db.run("PRAGMA cipher_compatibility = 3");
 
   db.run("PRAGMA key = 'mysecret'");
   db.run("CREATE TABLE lorem (info TEXT)");
@@ -58,13 +51,29 @@ db.close();
 
 # SQLCipher
 
-A copy of the source for SQLCipher 4.3.0 is bundled, which is based on SQLite 3.31.0.
+A copy of the source for SQLCipher 4.4.0 is bundled, which is based on SQLite 3.31.0.
+
+## Building from source.
+
+This is done automatically by node-pre-gyp when installing on a platform without pre-built binaries.
+However, this does require some additional setup, and is likely to run against obscure errors when installing.
+
+Requirements:
+
+### Mac
+
+ * `brew install openssl@1.1`
+
+### Windows
+
+ * Visual Studio 2015
+ * Python 2.7
 
 ## OpenSSL
 
 SQLCipher depends on OpenSSL. When using NodeJS, OpenSSL is provided by NodeJS itself. For Electron, we need to use our own copy.
 
-For Windows we bundle OpenSSL 1.0.2n. Pre-built libraries are used from https://slproweb.com/products/Win32OpenSSL.html.
+For Windows, we bundle OpenSSL 1.0.2n. Pre-built libraries are used from https://slproweb.com/products/Win32OpenSSL.html.
 
 On Mac we build against OpenSSL installed via brew, but statically link it so that end-users do not need to install it.
 
@@ -80,7 +89,7 @@ Documentation for the SQLCipher extension is available [here](https://www.zeteti
 
 [mocha](https://github.com/visionmedia/mocha) is required to run unit tests.
 
-In sqlite3's directory (where its `package.json` resides) run the following:
+In sqlite3's directory (where its `package.json` resides) run the following:
 
     npm install --build-from-source
     npm test
@@ -92,7 +101,7 @@ To publish a new version, run:
     npm version minor -m "%s [publish binary]"
     npm publish
 
-Publishing of the prebuilt binaries is performed on CircleCI and AppVeyor.
+Publishing of the prebuilt binaries is performed on CircleCI.
 
 # Acknowledgments
 
