@@ -1,7 +1,7 @@
 {
   "name": "@journeyapps/sqlcipher",
   "description": "Asynchronous, non-blocking SQLCipher bindings",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "homepage": "http://github.com/journeyapps/node-sqlcipher",
   "author": {
     "name": "JourneyApps",
@@ -66,5 +66,12 @@
     "sqlite3",
     "database"
   ],
-  "main": "./lib/sqlite3"
+  "main": "./lib/sqlite3",
+  "files": [
+    "lib/**/*.js",
+    "sqlite3.js",
+    "src",
+    "deps",
+    "*.gyp"
+  ]
 }
