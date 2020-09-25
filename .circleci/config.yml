@@ -1,3 +1,8 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.4.0
+
 aliases:
   - &publish-command
     name: Publish
@@ -10,6 +15,20 @@ aliases:
       ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
       if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
         ./node_modules/.bin/node-pre-gyp package testpackage $GYP_ARGS
+        ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
+      else
+        echo "Not a tagged build - not publishing"
+      fi
+
+  - &publish-command-windows
+    name: Publish
+    shell: bash.exe
+    command: |
+      export PATH=/c/nodejs:$PATH
+      COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
+      ./node_modules/.bin/node-pre-gyp rebuild package testpackage
+      if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
+        ./node_modules/.bin/node-pre-gyp package testpackage
         ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
       else
         echo "Not a tagged build - not publishing"
@@ -50,7 +69,6 @@ aliases:
       - run: *publish-command
 
   - &common-macos
-    resource_class: large
     macos:
       xcode: "10.2.1"
     steps:
@@ -85,7 +103,6 @@ aliases:
           <<: *publish-command
 
   - &common-electron-macos
-    resource_class: large
     macos:
       xcode: "10.2.1"
     steps:
@@ -121,128 +138,179 @@ aliases:
       - run:
           <<: *publish-command
 
-version: 2
+  - &common-windows
+    working_directory: c:\\project
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run:
+          name: Setup
+          command: |
+            $ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';
+            cd \tmp
+            Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-{1}.zip' -f $env:NODE_VERSION,$env:NODE_ARCH) -OutFile 'node.zip' -UseBasicParsing
+            Expand-Archive node.zip -DestinationPath C:\
+            Rename-Item -Path $('C:\node-v{0}-win-{1}' -f $env:NODE_VERSION,$env:NODE_ARCH) -NewName 'C:\nodejs'
+
+            $env:PATH = 'C:\nodejs;{0}' -f $env:PATH
+            [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+            # npm --vs2015 install --global windows-build-tools
+
+            node -v
+      - run:
+          name: Install
+          command: npm install --build-from-source
+      - run: npm run test
+      - run:
+          <<: *publish-command-windows
+      - store_artifacts:
+          path: c:\\project\\lib\\binding
+# These tests pass, but exit with code 1 on Windows. Disable for now
+#      - run:
+#          name: Test Electron
+#          command: |
+#            ./node_modules/.bin/electron "test/support/createdb-electron.js"
+#            ./node_modules/.bin/electron-mocha --timeout 480000
 jobs:
-  build-14.11.0:
+  build-14:
     <<: *common-build
     environment:
       PUBLISH: true
     docker:
       - image: circleci/node:14.11.0
 
-  build-12.6.0:
+  build-12:
     <<: *common-build
     docker:
       - image: circleci/node:12.6.0
 
-  build-10.16.0:
+  build-10:
     <<: *common-build
     docker:
       - image: circleci/node:10.16.0
 
   # Node version should match electron's node version.
   # See https://github.com/mapbox/node-sqlite3/pull/1367
-  build-electron-10.1.2:
+  build-electron-10:
     <<: *common-electron-linux
     docker:
       - image: circleci/node:12.16.3
     environment:
       ELECTRON_VERSION: "10.1.2"
 
-  build-electron-9.3.1:
+  build-electron-9:
     <<: *common-electron-linux
     docker:
       - image: circleci/node:12.14.1
     environment:
       ELECTRON_VERSION: "9.3.1"
 
-  build-electron-8.5.2:
+  build-electron-8:
     <<: *common-electron-linux
     docker:
       - image: circleci/node:12.13.0
     environment:
       ELECTRON_VERSION: "8.5.2"
 
-  build-electron-7.1.14:
+  build-electron-7:
     <<: *common-electron-linux
     docker:
       - image: circleci/node:12.8.1
     environment:
       ELECTRON_VERSION: "7.1.14"
 
-  build-electron-6.1.9:
+  build-electron-6:
     <<: *common-electron-linux
     docker:
       - image: circleci/node:12.6.0 # Issues with 12.4.0
     environment:
       ELECTRON_VERSION: "6.1.9"
 
-  build-macos-14.11.0:
+  build-macos-14:
     <<: *common-macos
     environment:
       PUBLISH: true
       NODE_VERSION: "14.11.0"
 
-  build-macos-12.6.0:
+  build-macos-12:
     <<: *common-macos
     environment:
       NODE_VERSION: "12.6.0"
 
-  build-macos-10.16.0:
+  build-macos-10:
     <<: *common-macos
     environment:
       NODE_VERSION: "10.16.0"
 
   # NODE_VERSION should match electron's node version.
   # See https://github.com/mapbox/node-sqlite3/pull/1367
-  build-macos-electron-10.1.2:
+  build-macos-electron-10:
     <<: *common-electron-macos
     environment:
       ELECTRON_VERSION: "10.1.2"
       NODE_VERSION: "12.16.3"
 
-  build-macos-electron-9.3.1:
+  build-macos-electron-9:
     <<: *common-electron-macos
     environment:
       ELECTRON_VERSION: "9.3.1"
       NODE_VERSION: "12.14.1"
 
-  build-macos-electron-8.5.2:
+  build-macos-electron-8:
     <<: *common-electron-macos
     environment:
       ELECTRON_VERSION: "8.5.2"
       NODE_VERSION: "12.13.0"
 
-  build-macos-electron-7.1.14:
+  build-macos-electron-7:
     <<: *common-electron-macos
     environment:
       ELECTRON_VERSION: "7.1.14"
       NODE_VERSION: "12.8.1"
 
-  build-macos-electron-6.1.9:
+  build-macos-electron-6:
     <<: *common-electron-macos
     environment:
       ELECTRON_VERSION: "6.1.9"
       # Issues with 12.4.0
       NODE_VERSION: "12.6.0"
 
+  # Node 14 - build NAPI 3 and 6
+  windows-14_x86:
+    <<: *common-windows
+    environment:
+      NODE_VERSION: "14.11.0"
+      NODE_ARCH: x86
+      PUBLISH: true
+
+  windows-14_x64:
+    <<: *common-windows
+    environment:
+      NODE_VERSION: "14.11.0"
+      NODE_ARCH: x64
+      PUBLISH: true
+
 workflows:
   version: 2
   build_all:
     jobs:
-      - build-14.11.0
-      - build-12.6.0
-      - build-10.16.0
-      - build-electron-10.1.2
-      - build-electron-9.3.1
-      - build-electron-8.5.2
-      - build-electron-7.1.14
-      - build-electron-6.1.9
-      - build-macos-14.11.0
-      - build-macos-12.6.0
-      - build-macos-10.16.0
-      - build-macos-electron-10.1.2
-      - build-macos-electron-9.3.1
-      - build-macos-electron-8.5.2
-      - build-macos-electron-7.1.14
-      - build-macos-electron-6.1.9
+      - build-14
+      - build-12
+      - build-10
+      - build-electron-10
+      - build-electron-9
+      - build-electron-8
+      - build-electron-7
+      - build-electron-6
+      - build-macos-14
+      - build-macos-12
+      - build-macos-10
+      - build-macos-electron-10
+      - build-macos-electron-9
+      - build-macos-electron-8
+      - build-macos-electron-7
+      - build-macos-electron-6
+      - windows-14_x86
+      - windows-14_x64
