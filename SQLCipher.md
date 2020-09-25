@@ -11,6 +11,10 @@ git clone git@github.com:sqlcipher/sqlcipher.git
 cd sqlcipher
 ./configure
 make sqlite3.c
+
+VERSION=3031000
+mkdir sqlcipher-amalgamation-$VERSION
+cp sqlite3.c sqlite3.h shell.c sqlite3ext.h VERSION sqlcipher-amalgamation-$VERSION/
 ```
 
 The above produces 4 files of interest:
@@ -23,7 +27,7 @@ sqlite3ext.h # optional
 VERSION # optional
 ```
 
-Copy these files to a new folder, `sqlcipher-amalgamation-<version>`.
+The files are copied to: `sqlcipher-amalgamation-<version>`.
 
 ## Step 2: Get OpenSSL libraries
 
@@ -45,6 +49,10 @@ Copy the header files (include folder) to `sqlcipher-amalgamation-<version>/open
 ## Step 3: Build the archive
 
 Archive the folder as `deps/sqlcipher-amalgamation-<version>.tar.gz`, and update the version number in `common-sqlite.gypi` (must be the same).
+
+```
+tar czf sqlcipher-amalgamation-$VERSION.tar.gz sqlcipher-amalgamation-$VERSION
+```
 
 ## Step 4: Test the build
 
