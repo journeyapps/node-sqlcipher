@@ -21,7 +21,7 @@ class Database;
 
 class Database : public Napi::ObjectWrap<Database> {
 public:
-#if NAPI_VERSION < 6
+#if NAPI_VERSION < 6 || TRUE
     static Napi::FunctionReference constructor;
 #endif
     static Napi::Object Init(Napi::Env env, Napi::Object exports);
@@ -31,7 +31,7 @@ public:
         Napi::HandleScope scope(env);
         if (!val.IsObject()) return false;
         Napi::Object obj = val.As<Napi::Object>();
-#if NAPI_VERSION < 6
+#if NAPI_VERSION < 6 || TRUE
         return obj.InstanceOf(constructor.Value());
 #else
         Napi::FunctionReference* constructor =

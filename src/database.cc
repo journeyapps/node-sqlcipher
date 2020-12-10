@@ -7,7 +7,7 @@
 
 using namespace node_sqlite3;
 
-#if NAPI_VERSION < 6
+#if NAPI_VERSION < 6 || TRUE
 Napi::FunctionReference Database::constructor;
 #endif
 
@@ -26,7 +26,7 @@ Napi::Object Database::Init(Napi::Env env, Napi::Object exports) {
         InstanceAccessor("open", &Database::OpenGetter, nullptr)
     });
 
-#if NAPI_VERSION < 6
+#if NAPI_VERSION < 6 || TRUE
     constructor = Napi::Persistent(t);
     constructor.SuppressDestruct();
 #else
