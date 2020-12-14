@@ -12,11 +12,7 @@
     "module_path": "./lib/binding/napi-v3-{platform}-{arch}",
     "host": "https://journeyapps-node-binary.s3.amazonaws.com",
     "remote_path": "./{name}/v{version}/{toolset}/",
-    "package_name": "napi-v{napi_build_version}-{platform}-{arch}.tar.gz",
-    "napi_versions": [
-      3,
-      6
-    ]
+    "package_name": "napi-v3-{platform}-{arch}.tar.gz",
   },
   "contributors": [
     "Konstantin Käfer <mail@kkaefer.com>",
