@@ -82,7 +82,13 @@ aliases:
       - run: sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
       # These are required for electron(-mocha)
       - run: sudo apt-get install -y libgtk2.0-0 libgtk-3-dev libxtst6 libxss1 libgconf2-4 libnss3 libasound2
-      - run: npm install --build-from-source
+      - run:
+          name: Install
+          command: |
+            node -v
+            npm install --build-from-source
+            npm add --dev electron@$ELECTRON_VERSION
+            ./node_modules/.bin/electron --version
       - run: *build-command
       - run: npm run pretest
       - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
@@ -146,10 +152,12 @@ aliases:
             node -v
 
       - run:
-          name: Install & Build
+          name: Install
           command: |
             node -v
             npm install --build-from-source
+            npm add --dev electron@$ELECTRON_VERSION
+            ./node_modules/.bin/electron --version
 
       - run: *build-command
       - run: npm run pretest
