@@ -24,6 +24,10 @@ aliases:
     name: Publish
     shell: bash.exe
     command: |
+      GYP_ARGS=""
+      if [[ "${ELECTRON_VERSION}" ]]; then
+        GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
+      fi
       export PATH=/c/nodejs:$PATH
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
       ./node_modules/.bin/node-pre-gyp rebuild package testpackage
@@ -163,6 +167,7 @@ aliases:
           name: Install
           command: npm install --build-from-source
       - run: npm run test
+      - run: ./node_modules/.bin/electron-mocha --timeout 480000
       - run:
           <<: *publish-command-windows
       - store_artifacts:
@@ -178,6 +183,7 @@ jobs:
     <<: *common-build
     environment:
       PUBLISH: true
+      ELECTRON_VERSION: "11.2.3"
     docker:
       - image: circleci/node:14.11.0
 
@@ -193,6 +199,13 @@ jobs:
 
   # Node version should match electron's node version.
   # See https://github.com/mapbox/node-sqlite3/pull/1367
+  build-electron-11:
+    <<: *common-electron-linux
+    docker:
+      - image: circleci/node:12.18.3
+    environment:
+      ELECTRON_VERSION: "11.2.3"
+
   build-electron-10:
     <<: *common-electron-linux
     docker:
@@ -233,6 +246,7 @@ jobs:
     environment:
       PUBLISH: true
       NODE_VERSION: "14.11.0"
+      ELECTRON_VERSION: "11.2.3"
 
   build-macos-12:
     <<: *common-macos
@@ -284,6 +298,7 @@ jobs:
       NODE_VERSION: "14.11.0"
       NODE_ARCH: x86
       PUBLISH: true
+      ELECTRON_VERSION: "11.2.3"
 
   windows-14_x64:
     <<: *common-windows
@@ -291,6 +306,7 @@ jobs:
       NODE_VERSION: "14.11.0"
       NODE_ARCH: x64
       PUBLISH: true
+      ELECTRON_VERSION: "11.2.3"
 
 workflows:
   version: 2
@@ -299,6 +315,7 @@ workflows:
       - build-14
       - build-12
       - build-10
+      - build-electron-11
       - build-electron-10
       - build-electron-9
       - build-electron-8
