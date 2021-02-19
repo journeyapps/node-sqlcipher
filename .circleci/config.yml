@@ -17,6 +17,7 @@ aliases:
     name: Build
     shell: bash.exe
     command: |
+      export PATH=/c/nodejs:$PATH
       GYP_ARGS=""
       if [[ "${ELECTRON_VERSION}" ]]; then
         GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
