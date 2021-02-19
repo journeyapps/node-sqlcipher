@@ -3,6 +3,8 @@ var assert = require('assert');
 var helper = require('./support/helper');
 
 describe('parallel', function() {
+    this.timeout(20000);
+
     var db;
     before(function(done) {
         helper.deleteFile('test/tmp/test_parallel_inserts.db');
