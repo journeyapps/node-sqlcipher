@@ -4,6 +4,26 @@ orbs:
   win: circleci/windows@2.4.0
 
 aliases:
+  - &build-command
+    name: Build
+    command: |
+      GYP_ARGS=""
+      if [[ "${ELECTRON_VERSION}" ]]; then
+        GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
+      fi
+      ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
+
+  - &build-command-windows
+    name: Build
+    shell: bash.exe
+    command: |
+      export PATH=/c/nodejs:$PATH
+      GYP_ARGS=""
+      if [[ "${ELECTRON_VERSION}" ]]; then
+        GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
+      fi
+      ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
+
   - &publish-command
     name: Publish
     command: |
@@ -12,9 +32,7 @@ aliases:
         GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
       fi
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
-      ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
       if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
-        ./node_modules/.bin/node-pre-gyp package testpackage $GYP_ARGS
         ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
       else
         echo "Not a tagged build - not publishing"
@@ -24,11 +42,13 @@ aliases:
     name: Publish
     shell: bash.exe
     command: |
+      GYP_ARGS=""
+      if [[ "${ELECTRON_VERSION}" ]]; then
+        GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
+      fi
       export PATH=/c/nodejs:$PATH
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
-      ./node_modules/.bin/node-pre-gyp rebuild package testpackage
       if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
-        ./node_modules/.bin/node-pre-gyp package testpackage
         ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
       else
         echo "Not a tagged build - not publishing"
@@ -43,6 +63,7 @@ aliases:
       - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
       - run: sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
       - run: npm install --build-from-source
+      - run: *build-command
 
       - run: npm run test
       - run: *publish-command
@@ -62,8 +83,13 @@ aliases:
       - run: sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
       # These are required for electron(-mocha)
       - run: sudo apt-get install -y libgtk2.0-0 libgtk-3-dev libxtst6 libxss1 libgconf2-4 libnss3 libasound2
-      - run: npm install --build-from-source
-      - run: ./node_modules/.bin/electron-rebuild --version=$ELECTRON_VERSION --dist-url=https://electronjs.org/headers
+      - run:
+          name: Install
+          command: |
+            node -v
+            npm install --build-from-source
+            npm install electron@$ELECTRON_VERSION
+      - run: *build-command
       - run: npm run pretest
       - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
       - run: *publish-command
@@ -97,10 +123,9 @@ aliases:
           command: |
             node -v
             npm install --build-from-source
-
+      - run: *build-command
       - run: npm run test
-      - run:
-          <<: *publish-command
+      - run: *publish-command
 
   - &common-electron-macos
     macos:
@@ -127,12 +152,13 @@ aliases:
             node -v
 
       - run:
-          name: Install & Build
+          name: Install
           command: |
             node -v
             npm install --build-from-source
+            npm install electron@$ELECTRON_VERSION
 
-      - run: ./node_modules/.bin/electron-rebuild --version=$ELECTRON_VERSION --dist-url=https://electronjs.org/headers
+      - run: *build-command
       - run: npm run pretest
       - run: ./node_modules/.bin/electron-mocha --timeout 480000
       - run:
@@ -162,9 +188,10 @@ aliases:
       - run:
           name: Install
           command: npm install --build-from-source
+      - run: *build-command-windows
       - run: npm run test
-      - run:
-          <<: *publish-command-windows
+      - run: ./node_modules/.bin/electron-mocha --timeout 480000
+      - run: *publish-command-windows
       - store_artifacts:
           path: c:\\project\\lib\\binding
 # These tests pass, but exit with code 1 on Windows. Disable for now
@@ -178,6 +205,7 @@ jobs:
     <<: *common-build
     environment:
       PUBLISH: true
+      ELECTRON_VERSION: "11.2.3"
     docker:
       - image: circleci/node:14.11.0
 
@@ -193,12 +221,19 @@ jobs:
 
   # Node version should match electron's node version.
   # See https://github.com/mapbox/node-sqlite3/pull/1367
+  build-electron-11:
+    <<: *common-electron-linux
+    docker:
+      - image: circleci/node:12.18.3
+    environment:
+      ELECTRON_VERSION: "11.2.3"
+
   build-electron-10:
     <<: *common-electron-linux
     docker:
       - image: circleci/node:12.16.3
     environment:
-      ELECTRON_VERSION: "10.1.2"
+      ELECTRON_VERSION: "10.3.2"
 
   build-electron-9:
     <<: *common-electron-linux
@@ -233,6 +268,7 @@ jobs:
     environment:
       PUBLISH: true
       NODE_VERSION: "14.11.0"
+      ELECTRON_VERSION: "11.2.3"
 
   build-macos-12:
     <<: *common-macos
@@ -246,10 +282,16 @@ jobs:
 
   # NODE_VERSION should match electron's node version.
   # See https://github.com/mapbox/node-sqlite3/pull/1367
+  build-macos-electron-11:
+    <<: *common-electron-macos
+    environment:
+      ELECTRON_VERSION: "11.2.3"
+      NODE_VERSION: "12.18.3"
+
   build-macos-electron-10:
     <<: *common-electron-macos
     environment:
-      ELECTRON_VERSION: "10.1.2"
+      ELECTRON_VERSION: "10.3.2"
       NODE_VERSION: "12.16.3"
 
   build-macos-electron-9:
@@ -284,6 +326,7 @@ jobs:
       NODE_VERSION: "14.11.0"
       NODE_ARCH: x86
       PUBLISH: true
+      ELECTRON_VERSION: "11.2.3"
 
   windows-14_x64:
     <<: *common-windows
@@ -291,6 +334,7 @@ jobs:
       NODE_VERSION: "14.11.0"
       NODE_ARCH: x64
       PUBLISH: true
+      ELECTRON_VERSION: "11.2.3"
 
 workflows:
   version: 2
@@ -299,7 +343,8 @@ workflows:
       - build-14
       - build-12
       - build-10
-      - build-electron-10
+      - build-electron-11
+      # - build-electron-10 # Segfaults on electron-mocha
       - build-electron-9
       - build-electron-8
       - build-electron-7
@@ -307,7 +352,8 @@ workflows:
       - build-macos-14
       - build-macos-12
       - build-macos-10
-      - build-macos-electron-10
+      - build-macos-electron-11
+      # - build-macos-electron-10 # Segfaults on electron-mocha
       - build-macos-electron-9
       - build-macos-electron-8
       - build-macos-electron-7
