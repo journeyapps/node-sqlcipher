@@ -89,7 +89,6 @@ aliases:
             node -v
             npm install --build-from-source
             npm add --dev electron@$ELECTRON_VERSION
-            ./node_modules/.bin/electron --version
       - run: *build-command
       - run: npm run pretest
       - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
@@ -158,7 +157,6 @@ aliases:
             node -v
             npm install --build-from-source
             npm add --dev electron@$ELECTRON_VERSION
-            ./node_modules/.bin/electron --version
 
       - run: *build-command
       - run: npm run pretest
