@@ -51,7 +51,7 @@ db.close();
 
 # SQLCipher
 
-A copy of the source for SQLCipher 4.4.0 is bundled, which is based on SQLite 3.31.0.
+A copy of the source for SQLCipher 4.4.2 is bundled, which is based on SQLite 3.33.0.
 
 ## Building from source.
 
@@ -95,7 +95,7 @@ Similarly, using electron directly should just work, but do check that a compati
 
 ## OpenSSL
 
-SQLCipher depends on OpenSSL. When using NodeJS, OpenSSL is provided by NodeJS itself. For Electron, we need to use our own copy.
+SQLCipher depends on OpenSSL.
 
 For Windows, we bundle OpenSSL 1.0.2n. Pre-built libraries are used from https://slproweb.com/products/Win32OpenSSL.html.
 
