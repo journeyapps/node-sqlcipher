@@ -108,25 +108,6 @@
       },
     },
     {
-      "target_name": "copy_dll",
-      "type": "none",
-      "dependencies": [ "action_before_build" ],
-      "conditions": [
-        ["OS == \"win\"", {
-          "copies": [
-            {
-              "files": [
-                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/libssl.lib',
-                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/libcrypto.lib',
-                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/ossl_static.pdb'
-              ],
-              "destination": "<(PRODUCT_DIR)"
-            }
-          ],
-        }]
-      ]
-    },
-    {
       'target_name': 'sqlite3',
       'type': 'static_library',
       "conditions": [
@@ -150,8 +131,7 @@
       ],
 
       'dependencies': [
-        'action_before_build',
-        'copy_dll'
+        'action_before_build'
       ],
       'sources': [
         '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/sqlite3.c'
