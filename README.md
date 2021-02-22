@@ -17,8 +17,6 @@ yarn add "@journeyapps/sqlcipher"
 # Or: npm install --save "@journeyapps/sqlcipher"
 ```
 
-For Electron, use `electron-rebuild` or similar tool.
-
 # Usage
 
 ``` js

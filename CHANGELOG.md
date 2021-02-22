@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.1.0
+
+- Update to SQLCipher 4.4.2 / SQLite 3.33.0.
+- Fix crash on Electron on Windows.
+_ Always use system or bundled OpenSSL, not OpenSSL bundled with Node.
+
 ## 5.0.0
 
 - Major change: Use N-API instead of NAN.
