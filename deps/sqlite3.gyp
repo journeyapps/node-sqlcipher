@@ -56,7 +56,9 @@
         'link_settings': {
           'libraries': [
             '-llibcrypto.lib',
-            '-llibssl.lib'
+            '-llibssl.lib',
+            '-lws2_32.lib',
+            '-lcrypt32.lib'
           ],
           'library_dirs': [
             '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/<(openssl_root)'
