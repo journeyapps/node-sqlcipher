@@ -43,6 +43,10 @@
             'variables': {
               'openssl_root%': 'OpenSSL-Win32',
             }
+          }, 'target_arch == "arm64"', {
+            'variables': {
+              'openssl_root%': 'OpenSSL-Win64-ARM',
+            }
           }, {
             'variables': {
               'openssl_root%': 'OpenSSL-Win64',
@@ -51,8 +55,10 @@
         ],
         'link_settings': {
           'libraries': [
-            '-llibeay32.lib',
-            '-lssleay32.lib',
+            '-llibcrypto.lib',
+            '-llibssl.lib',
+            '-lws2_32.lib',
+            '-lcrypt32.lib'
           ],
           'library_dirs': [
             '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/<(openssl_root)'
@@ -112,8 +118,9 @@
           "copies": [
             {
               "files": [
-                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/libeay32.dll',
-                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/msvcr120.dll'
+                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/libssl.lib',
+                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/libcrypto.lib',
+                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/ossl_static.pdb'
               ],
               "destination": "<(PRODUCT_DIR)"
             }
