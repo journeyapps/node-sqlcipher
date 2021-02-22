@@ -57,6 +57,7 @@
           'libraries': [
             '-llibcrypto.lib',
             '-llibssl.lib',
+            # The two libs below are needed for the Electron build to succeed
             '-lws2_32.lib',
             '-lcrypt32.lib'
           ],
