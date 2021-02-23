@@ -1,10 +1,16 @@
 # Changelog
 
+## 5.2.0
+
+- Statically link OpenSSL on Linux and Windows, in addition to MacOS. No more DLLs distributed.
+- Upgrade to OpenSSL 1.1.1i.
+- Provide pre-built binaries for ARM64 on Windows (not regularly tested, but should work).
+
 ## 5.1.0
 
 - Update to SQLCipher 4.4.2 / SQLite 3.33.0.
 - Fix crash on Electron on Windows.
-_ Always use system or bundled OpenSSL, not OpenSSL bundled with Node.
+- Always use system or bundled OpenSSL, not OpenSSL bundled with Node.
 
 ## 5.0.0
 
