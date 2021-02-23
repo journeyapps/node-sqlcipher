@@ -377,3 +377,4 @@ workflows:
       - build-macos-electron-6
       - windows-14_x86
       - windows-14_x64
+      - windows-14_arm64
