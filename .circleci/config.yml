@@ -195,8 +195,15 @@ aliases:
           name: Install
           command: npm install --build-from-source
       - run: *build-command-windows
-      - run: npm run test
-      - run: ./node_modules/.bin/electron-mocha --timeout 480000
+      - run:
+          name: Test
+          shell: bash.exe
+          command: |
+            export PATH=/c/nodejs:$PATH
+            if [[ "${SKIP_TEST}" != "true" ]]; then
+              npm run test
+              ./node_modules/.bin/electron-mocha --timeout 480000
+            fi
       - run: *publish-command-windows
       - store_artifacts:
           path: c:\\project\\lib\\binding
@@ -352,6 +359,7 @@ jobs:
       PUBLISH: true
       ELECTRON_VERSION: "11.2.3"
       BUILD_ARM64: true
+      SKIP_TEST: true # We can build for arm64, but can't run arm64.
 
 workflows:
   version: 2
@@ -377,3 +385,4 @@ workflows:
       - build-macos-electron-6
       - windows-14_x86
       - windows-14_x64
+      - windows-14_arm64
