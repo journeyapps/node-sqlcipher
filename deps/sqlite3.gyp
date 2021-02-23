@@ -43,6 +43,10 @@
             'variables': {
               'openssl_root%': 'OpenSSL-Win32',
             }
+          }, 'target_arch == "arm64"', {
+            'variables': {
+              'openssl_root%': 'OpenSSL-Win64-ARM',
+            }
           }, {
             'variables': {
               'openssl_root%': 'OpenSSL-Win64',
@@ -51,8 +55,11 @@
         ],
         'link_settings': {
           'libraries': [
-            '-llibeay32.lib',
-            '-lssleay32.lib',
+            '-llibcrypto.lib',
+            '-llibssl.lib',
+            # The two libs below are needed for the Electron build to succeed
+            '-lws2_32.lib',
+            '-lcrypt32.lib'
           ],
           'library_dirs': [
             '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/<(openssl_root)'
@@ -104,24 +111,6 @@
       },
     },
     {
-      "target_name": "copy_dll",
-      "type": "none",
-      "dependencies": [ "action_before_build" ],
-      "conditions": [
-        ["OS == \"win\"", {
-          "copies": [
-            {
-              "files": [
-                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/libeay32.dll',
-                '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/>(openssl_root)/msvcr120.dll'
-              ],
-              "destination": "<(PRODUCT_DIR)"
-            }
-          ],
-        }]
-      ]
-    },
-    {
       'target_name': 'sqlite3',
       'type': 'static_library',
       "conditions": [
@@ -145,8 +134,7 @@
       ],
 
       'dependencies': [
-        'action_before_build',
-        'copy_dll'
+        'action_before_build'
       ],
       'sources': [
         '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/sqlite3.c'

@@ -95,7 +95,7 @@ Similarly, using electron directly should just work, but do check that a compati
 
 SQLCipher depends on OpenSSL.
 
-For Windows, we bundle OpenSSL 1.0.2n. Pre-built libraries are used from https://slproweb.com/products/Win32OpenSSL.html.
+For Windows, we bundle OpenSSL 1.1.1i. Binaries are generated using [vckpg](https://github.com/microsoft/vcpkg) (e.g., `.\vcpkg\vcpkg install openssl:x64-windows-static`).
 
 On Mac we build against OpenSSL installed via brew, but statically link it so that end-users do not need to install it.
 

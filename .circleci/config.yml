@@ -22,6 +22,9 @@ aliases:
       if [[ "${ELECTRON_VERSION}" ]]; then
         GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
       fi
+      if [[ "${BUILD_ARM64}" == "true" ]]; then
+        GYP_ARGS="${GYP_ARGS} --target_arch=arm64"
+      fi
       ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
 
   - &publish-command
@@ -45,6 +48,9 @@ aliases:
       GYP_ARGS=""
       if [[ "${ELECTRON_VERSION}" ]]; then
         GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
+      fi
+      if [[ "${BUILD_ARM64}" == "true" ]]; then
+        GYP_ARGS="${GYP_ARGS} --target_arch=arm64"
       fi
       export PATH=/c/nodejs:$PATH
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
@@ -327,6 +333,7 @@ jobs:
       NODE_ARCH: x86
       PUBLISH: true
       ELECTRON_VERSION: "11.2.3"
+      BUILD_ARM64: false
 
   windows-14_x64:
     <<: *common-windows
@@ -335,6 +342,16 @@ jobs:
       NODE_ARCH: x64
       PUBLISH: true
       ELECTRON_VERSION: "11.2.3"
+      BUILD_ARM64: false
+
+  windows-14_arm64:
+    <<: *common-windows
+    environment:
+      NODE_VERSION: "14.11.0"
+      NODE_ARCH: x64
+      PUBLISH: true
+      ELECTRON_VERSION: "11.2.3"
+      BUILD_ARM64: true
 
 workflows:
   version: 2

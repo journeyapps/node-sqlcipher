@@ -33,18 +33,22 @@ The files are copied to: `sqlcipher-amalgamation-<version>`.
 
 NodeJS typically includes OpenSSL. However, for Electron on Windows, we need to bundle a copy.
 
-Download OpenSSL 1.0.x from https://slproweb.com/products/Win32OpenSSL.html, both 32-bit and 64-bit versions. Install locally, then copy these files:
+Run the following commands to generate the latest OpenSSL libs for Windows:
 
 ```
-lib/libeay32.lib
-lib/ssleay32.lib
-bin/libeay32.dll
-bin/msvcr120.dll
+cd deps
+.\openssl-windows.bat
 ```
 
-Place these files in `sqlcipher-amalgamation-<version>/OpenSSL-Win32` and `sqlcipher-amalgamation-<version>/OpenSSL-Win64`.
+... this will output the libs in `deps/openssl-windows` (OpenSSL-WinXX), including the header files in `deps/openssl-windows/openssl-include`. Every arch-specific folder includes these binaries:
 
-Copy the header files (include folder) to `sqlcipher-amalgamation-<version>/openssl-include/openssl`.
+```
+libcrypto.lib
+libssl.lib
+ossl_static.pdb
+```
+
+Copy all folders under `deps/openssl-windows` to `sqlcipher-amalgamation-<version>`.
 
 ## Step 3: Build the archive
 
@@ -71,7 +75,7 @@ npm run test
 
 # Notes
 
-The OpenSSL files are specifically required for Electron, which doesn't bundle OpenSSL like NodeJS does. The header and .lib files are required at compile-time, and `libeay32.dll` and `mscvr120.dll` are required at runtime. We bundle it with the library, so the user does not need to manually install OpenSSL.
+The OpenSSL files are specifically required for Electron, which doesn't bundle OpenSSL like NodeJS does. The header and .lib files are required at compile-time. We bundle a statically-linked version of OpenSSL with the library, so the user does not need to manually install OpenSSL.
 
 `deps/sqlite3.gyp` has been modified from the original node-sqlite3 one to:
  * Use the bundled OpenSSL on Windows.
