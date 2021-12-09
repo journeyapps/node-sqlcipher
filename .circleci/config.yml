@@ -37,6 +37,9 @@ aliases:
       if [[ "${ELECTRON_VERSION}" ]]; then
         GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
       fi
+      if [[ "${BUILD_ARM64}" == "true" ]]; then
+        GYP_ARGS="${GYP_ARGS} --target_arch=arm64"
+      fi
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
       if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
         ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
