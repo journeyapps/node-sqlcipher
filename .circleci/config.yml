@@ -11,6 +11,9 @@ aliases:
       if [[ "${ELECTRON_VERSION}" ]]; then
         GYP_ARGS="--runtime=electron --target=${ELECTRON_VERSION} --dist-url=https://electronjs.org/headers"
       fi
+      if [[ "${BUILD_ARM64}" == "true" ]]; then
+        GYP_ARGS="${GYP_ARGS} --target_arch=arm64"
+      fi
       ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
 
   - &build-command-windows
@@ -102,7 +105,7 @@ aliases:
 
   - &common-macos
     macos:
-      xcode: "10.2.1"
+      xcode: "13.1.0"
     steps:
       - checkout
       - run: |
@@ -130,12 +133,17 @@ aliases:
             node -v
             npm install --build-from-source
       - run: *build-command
-      - run: npm run test
+      - run:
+          name: Run Tests
+          command: |
+            if [[ "${SKIP_TEST}" != "true" ]]; then
+              npm run test
+            fi
       - run: *publish-command
 
   - &common-electron-macos
     macos:
-      xcode: "10.2.1"
+      xcode: "13.1.0"
     steps:
       - checkout
       - run: |
@@ -283,6 +291,15 @@ jobs:
       NODE_VERSION: "14.11.0"
       ELECTRON_VERSION: "11.2.3"
 
+  build-macos-14-arm64:
+    <<: *common-macos
+    environment:
+      PUBLISH: true
+      NODE_VERSION: "14.11.0"
+      ELECTRON_VERSION: "11.2.3"
+      BUILD_ARM64: true
+      SKIP_TEST: true
+
   build-macos-12:
     <<: *common-macos
     environment:
@@ -365,24 +382,25 @@ workflows:
   version: 2
   build_all:
     jobs:
-      - build-14
-      - build-12
-      - build-10
-      - build-electron-11
-      # - build-electron-10 # Segfaults on electron-mocha
-      - build-electron-9
-      - build-electron-8
-      - build-electron-7
-      - build-electron-6
+#      - build-14
+#      - build-12
+#      - build-10
+#      - build-electron-11
+#      # - build-electron-10 # Segfaults on electron-mocha
+#      - build-electron-9
+#      - build-electron-8
+#      - build-electron-7
+#      - build-electron-6
+      - build-macos-14-arm64
       - build-macos-14
-      - build-macos-12
-      - build-macos-10
-      - build-macos-electron-11
-      # - build-macos-electron-10 # Segfaults on electron-mocha
-      - build-macos-electron-9
-      - build-macos-electron-8
-      - build-macos-electron-7
-      - build-macos-electron-6
-      - windows-14_x86
-      - windows-14_x64
-      - windows-14_arm64
+#      - build-macos-12
+#      - build-macos-10
+#      - build-macos-electron-11
+#      # - build-macos-electron-10 # Segfaults on electron-mocha
+#      - build-macos-electron-9
+#      - build-macos-electron-8
+#      - build-macos-electron-7
+#      - build-macos-electron-6
+#      - windows-14_x86
+#      - windows-14_x64
+#      - windows-14_arm64
