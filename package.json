@@ -68,6 +68,7 @@
     "database"
   ],
   "main": "./lib/sqlite3",
+  "types": "./lib/sqlite3.d.ts",
   "files": [
     "lib/**/*.js",
     "sqlite3.js",
