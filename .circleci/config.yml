@@ -382,7 +382,7 @@ workflows:
   version: 2
   build_all:
     jobs:
-#      - build-14
+      - build-14
 #      - build-12
 #      - build-10
 #      - build-electron-11
@@ -402,5 +402,5 @@ workflows:
 #      - build-macos-electron-7
 #      - build-macos-electron-6
 #      - windows-14_x86
-#      - windows-14_x64
+      - windows-14_x64
 #      - windows-14_arm64
