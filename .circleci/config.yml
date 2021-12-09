@@ -383,24 +383,24 @@ workflows:
   build_all:
     jobs:
       - build-14
-#      - build-12
-#      - build-10
-#      - build-electron-11
-#      # - build-electron-10 # Segfaults on electron-mocha
-#      - build-electron-9
-#      - build-electron-8
-#      - build-electron-7
-#      - build-electron-6
+      - build-12
+      - build-10
+      - build-electron-11
+      # - build-electron-10 # Segfaults on electron-mocha
+      - build-electron-9
+      - build-electron-8
+      - build-electron-7
+      - build-electron-6
       - build-macos-14-arm64
       - build-macos-14
-#      - build-macos-12
-#      - build-macos-10
-#      - build-macos-electron-11
-#      # - build-macos-electron-10 # Segfaults on electron-mocha
-#      - build-macos-electron-9
-#      - build-macos-electron-8
-#      - build-macos-electron-7
-#      - build-macos-electron-6
-#      - windows-14_x86
+      - build-macos-12
+      - build-macos-10
+      - build-macos-electron-11
+      # - build-macos-electron-10 # Segfaults on electron-mocha
+      - build-macos-electron-9
+      - build-macos-electron-8
+      - build-macos-electron-7
+      - build-macos-electron-6
+      - windows-14_x86
       - windows-14_x64
-#      - windows-14_arm64
+      - windows-14_arm64
