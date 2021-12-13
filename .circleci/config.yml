@@ -405,28 +405,28 @@ workflows:
   version: 2
   build_all:
     jobs:
-      - build-16
-      - build-14
-      - build-12
-      - build-10
-      - build-electron-16
-      - build-electron-11
-      # - build-electron-10 # Segfaults on electron-mocha
-      - build-electron-9
-      - build-electron-8
-      - build-electron-7
-      - build-electron-6
+#      - build-16
+#      - build-14
+#      - build-12
+#      - build-10
+#      - build-electron-16
+#      - build-electron-11
+#      # - build-electron-10 # Segfaults on electron-mocha
+#      - build-electron-9
+#      - build-electron-8
+#      - build-electron-7
+#      - build-electron-6
       - build-macos-16-arm64
-      - build-macos-16
-      - build-macos-14
-      - build-macos-12
-      - build-macos-10
-      - build-macos-electron-11
-      # - build-macos-electron-10 # Segfaults on electron-mocha
-      - build-macos-electron-9
-      - build-macos-electron-8
-      - build-macos-electron-7
-      - build-macos-electron-6
-      - windows-16_x86
-      - windows-16_x64
-      - windows-16_arm64
+#      - build-macos-16
+#      - build-macos-14
+#      - build-macos-12
+#      - build-macos-10
+#      - build-macos-electron-11
+#      # - build-macos-electron-10 # Segfaults on electron-mocha
+#      - build-macos-electron-9
+#      - build-macos-electron-8
+#      - build-macos-electron-7
+#      - build-macos-electron-6
+#      - windows-16_x86
+#      - windows-16_x64
+#      - windows-16_arm64
