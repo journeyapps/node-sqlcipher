@@ -23,7 +23,7 @@ To release a new version:
 
 **1)** Ensure tests are passing
 
-Before considering a release all the tests need to be passing on appveyor and travis.
+Before considering a release all the tests need to be passing on CircleCI.
 
 **2)** Bump commit
 
