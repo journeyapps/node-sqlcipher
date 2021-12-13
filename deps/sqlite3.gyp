@@ -62,18 +62,15 @@
             '-lcrypt32.lib'
           ],
           'library_dirs': [
-            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/<(openssl_root)'
+            '$(srcdir)/deps/<(openssl_root)'
           ]
         }
       },
       'OS == "mac"', {
-        'variables': {
-          'openssl_root%': '/usr/local/opt/openssl@1.1'
-        },
         'link_settings': {
           'libraries': [
             # This statically links libcrypto, whereas -lcrypto would dynamically link it
-            '<(openssl_root)/lib/libcrypto.a'
+            '$(srcdir)/deps/openssl-macos/libcrypto.a'
           ]
         }
       },
@@ -89,59 +86,33 @@
 
   'targets': [
     {
-      'target_name': 'action_before_build',
-      'type': 'none',
-      'hard_dependency': 1,
-      'actions': [
-        {
-          'action_name': 'unpack_sqlite_dep',
-          'inputs': [
-            './sqlcipher-amalgamation-<@(sqlite_version).tar.gz'
-          ],
-          'outputs': [
-            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/sqlite3.c'
-          ],
-          'action': ['node','./extract.js','./sqlcipher-amalgamation-<@(sqlite_version).tar.gz','<(SHARED_INTERMEDIATE_DIR)']
-        }
-      ],
-      'direct_dependent_settings': {
-        'include_dirs': [
-          '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/',
-        ]
-      },
-    },
-    {
       'target_name': 'sqlite3',
       'type': 'static_library',
       "conditions": [
         ["OS == \"win\"", {
           'include_dirs': [
-            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/',
-            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/openssl-include/'
+            './sqlcipher-amalgamation/',
+            './openssl-include/'
           ]
         },
         "OS == \"mac\"", {
           'include_dirs': [
-            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/',
-            '>(openssl_root)/include'
+            './sqlcipher-amalgamation/',
+            './openssl-include/'
           ]
         },
         { # linux
           'include_dirs': [
-            '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/'
+            './sqlcipher-amalgamation/'
           ]
         }]
       ],
-
-      'dependencies': [
-        'action_before_build'
-      ],
       'sources': [
-        '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/sqlite3.c'
+        './sqlcipher-amalgamation/sqlite3.c'
       ],
       'direct_dependent_settings': {
         'include_dirs': [
-          '<(SHARED_INTERMEDIATE_DIR)/sqlcipher-amalgamation-<@(sqlite_version)/'
+          './sqlcipher-amalgamation/'
         ],
         'defines': [
           'SQLITE_THREADSAFE=1',
@@ -171,10 +142,7 @@
         'SQLITE_TEMP_STORE=2',
         'SQLITE_SECURE_DELETE',
         'SQLITE_ENABLE_DBSTAT_VTAB=1'
-      ],
-      'export_dependent_settings': [
-        'action_before_build',
-      ],
+      ]
     }
   ]
 }
