@@ -62,7 +62,7 @@
             '-lcrypt32.lib'
           ],
           'library_dirs': [
-            '$(srcdir)/deps/<(openssl_root)'
+            '<(module_root_dir)/deps/<(openssl_root)'
           ]
         }
       },
@@ -70,7 +70,7 @@
         'link_settings': {
           'libraries': [
             # This statically links libcrypto, whereas -lcrypto would dynamically link it
-            '$(srcdir)/deps/openssl-macos/libcrypto.a'
+            '<(module_root_dir)/deps/openssl-macos/libcrypto.a'
           ]
         }
       },
