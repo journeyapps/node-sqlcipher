@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.3.0
+
+- Pre-built binaries for macos/darwin arm64.
+- Add typescript types.
+- Don't fallback to building from source.
+- Smaller NPM package (build dependencies not included anymore).
+
 ## 5.2.0
 
 - Statically link OpenSSL on Linux and Windows, in addition to MacOS. No more DLLs distributed.
