@@ -71,8 +71,7 @@
   "types": "./lib/sqlite3.d.ts",
   "files": [
     "lib/**/*.js",
-    "sqlite3.js",
-    "src",
-    "*.gyp"
+    "lib/**/*.ts",
+    "sqlite3.js"
   ]
 }
