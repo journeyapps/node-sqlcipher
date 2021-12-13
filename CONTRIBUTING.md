@@ -1,14 +1,15 @@
 # Contributing
 
-General guidelines for contributing to node-sqlite3
+General guidelines for contributing to node-sqlcipher.
 
-## Install Help
+# Testing
 
-If you've landed here due to a failed install of `node-sqlite3` then feel free to create a [new issue](https://github.com/mapbox/node-sqlite3/issues/new) to ask for help. The most likely problem is that we do not yet provide pre-built binaries for your particular platform and so the `node-sqlite3` install attempted a source compile but failed because you are missing the [dependencies for node-gyp](https://github.com/TooTallNate/node-gyp#installation). But please provide as much detail on your problem as possible and we'll try to help. Please include:
- - terminal logs of failed install (preferably from running `npm install sqlite3 --loglevel=info`)
- - `node-sqlite3` version you tried to install
- - node version you are running
- - operating system and architecture you are running, e.g. `Windows 7 64 bit`.
+[mocha](https://github.com/visionmedia/mocha) is required to run unit tests.
+
+In sqlite3's directory (where its `package.json` resides) run the following:
+
+    npm install --build-from-source
+    npm test
 
 ## Developing / Pre-release
 
@@ -36,13 +37,7 @@ git commit --allow-empty -m "[publish binary]"
 
 **3)** Ensure binaries built
 
-Check the travis and appveyor pages to ensure they are all green as an indication that the `[publish binary]` command worked.
-
-If you need to republish binaries you can do this with the command below, however this should not be a common thing for you to do!
-
-```sh
-git commit --allow-empty -m "[republish binary]"
-```
+Check the CircleCI pages to ensure they are all green as an indication that the `[publish binary]` command worked.
 
 Note: NEVER republish binaries for an existing released version.
 

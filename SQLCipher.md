@@ -22,16 +22,16 @@ The above produces 4 files of interest:
 ```
 sqlite3.c
 sqlite3.h
-shell.c # optional
-sqlite3ext.h # optional
-VERSION # optional
+shell.c
+sqlite3ext.h
+VERSION # rename to VERSION.txt
 ```
 
-The files are copied to: `sqlcipher-amalgamation-<version>`.
+Copy these files to: `deps/sqlcipher-amalgamation`.
 
 ## Step 2: Get OpenSSL libraries
 
-NodeJS typically includes OpenSSL. However, for Electron on Windows, we need to bundle a copy.
+NodeJS typically includes OpenSSL. However, to support Electron, we statically link against libcrypto from OpenSSL.
 
 Run the following commands to generate the latest OpenSSL libs for Windows:
 
@@ -40,7 +40,7 @@ cd deps
 .\openssl-windows.bat
 ```
 
-... this will output the libs in `deps/openssl-windows` (OpenSSL-WinXX), including the header files in `deps/openssl-windows/openssl-include`. Every arch-specific folder includes these binaries:
+... this will output the libs in `deps/` (OpenSSL-WinXX), including the header files in `deps/openssl-include`. Every arch-specific folder includes these binaries:
 
 ```
 libcrypto.lib
@@ -48,17 +48,7 @@ libssl.lib
 ossl_static.pdb
 ```
 
-Copy all folders under `deps/openssl-windows` to `sqlcipher-amalgamation-<version>`.
-
-## Step 3: Build the archive
-
-Archive the folder as `deps/sqlcipher-amalgamation-<version>.tar.gz`, and update the version number in `common-sqlite.gypi` (must be the same).
-
-```
-tar czf sqlcipher-amalgamation-$VERSION.tar.gz sqlcipher-amalgamation-$VERSION
-```
-
-## Step 4: Test the build
+## Step 3: Test the build
 
 Run:
 
@@ -78,7 +68,7 @@ npm run test
 The OpenSSL files are specifically required for Electron, which doesn't bundle OpenSSL like NodeJS does. The header and .lib files are required at compile-time. We bundle a statically-linked version of OpenSSL with the library, so the user does not need to manually install OpenSSL.
 
 `deps/sqlite3.gyp` has been modified from the original node-sqlite3 one to:
- * Use the bundled OpenSSL on Windows.
+ * Use the bundled OpenSSL on Windows and MacOS.
  * Add additional define statements required by SQLCipher.
 
 

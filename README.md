@@ -53,21 +53,10 @@ A copy of the source for SQLCipher 4.4.2 is bundled, which is based on SQLite 3.
 
 ## Building from source.
 
-This is done automatically by node-pre-gyp when installing on a platform without pre-built binaries. This should generally
-not be required with later versions, since two pre-built versions (N-API 3 and N-API 6) cover all electron and node versions.
+Building from source when installing the package is only supported up to version 5.2.0.
 
-However, this does require some additional setup, and is likely to run against obscure errors when installing.
-
-Requirements:
-
-### Mac
-
- * `brew install openssl@1.1`
-
-### Windows
-
- * Visual Studio 2015
- * Python 2.7
+The two pre-built versions (N-API 3 and N-API 6) cover all electron and node versions, so building from source should
+not be required.
 
 ## Usage with electron-forge / electron-rebuild
 
@@ -97,7 +86,7 @@ SQLCipher depends on OpenSSL.
 
 For Windows, we bundle OpenSSL 1.1.1i. Binaries are generated using [vckpg](https://github.com/microsoft/vcpkg) (e.g., `.\vcpkg\vcpkg install openssl:x64-windows-static`).
 
-On Mac we build against OpenSSL installed via brew, but statically link it so that end-users do not need to install it.
+On Mac we bundle OpenSSL 1.1.1l.
 
 On Linux we dynamically link against the system OpenSSL.
 
@@ -106,24 +95,6 @@ On Linux we dynamically link against the system OpenSSL.
 See the [API documentation](https://github.com/mapbox/node-sqlite3/wiki) in the wiki.
 
 Documentation for the SQLCipher extension is available [here](https://www.zetetic.net/sqlcipher/sqlcipher-api/).
-
-# Testing
-
-[mocha](https://github.com/visionmedia/mocha) is required to run unit tests.
-
-In sqlite3's directory (where its `package.json` resides) run the following:
-
-    npm install --build-from-source
-    npm test
-
-# Publishing
-
-To publish a new version, run:
-
-    npm version minor -m "%s [publish binary]"
-    npm publish
-
-Publishing of the prebuilt binaries is performed on CircleCI.
 
 # Acknowledgments
 
