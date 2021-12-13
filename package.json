@@ -73,7 +73,6 @@
     "lib/**/*.js",
     "sqlite3.js",
     "src",
-    "deps",
     "*.gyp"
   ]
 }
