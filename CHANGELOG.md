@@ -1,11 +1,16 @@
 # Changelog
 
+## 5.3.1
+
+- Linux: Downgrade glibc requirement to 2.24, supporting Ubuntu 16.10+ and Debian 9 (Stretch)+ again.
+
 ## 5.3.0
 
 - Pre-built binaries for macos/darwin arm64.
 - Add typescript types.
 - Don't fallback to building from source.
 - Smaller NPM package (build dependencies not included anymore).
+- Linux: Requires glibc 2.28+ (Ubuntu 18.10+).
 
 ## 5.2.0
 
