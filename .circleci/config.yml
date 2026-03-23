@@ -14,7 +14,7 @@ aliases:
       if [[ "${BUILD_ARM64}" == "true" ]]; then
         GYP_ARGS="${GYP_ARGS} --target_arch=arm64"
       fi
-      ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
+      pnpm exec node-pre-gyp rebuild package testpackage $GYP_ARGS
 
   - &build-command-windows
     name: Build
@@ -28,7 +28,7 @@ aliases:
       if [[ "${BUILD_ARM64}" == "true" ]]; then
         GYP_ARGS="${GYP_ARGS} --target_arch=arm64"
       fi
-      ./node_modules/.bin/node-pre-gyp rebuild package testpackage $GYP_ARGS
+      pnpm exec node-pre-gyp rebuild package testpackage $GYP_ARGS
 
   - &publish-command
     name: Publish
@@ -42,7 +42,7 @@ aliases:
       fi
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
       if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
-        ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
+        pnpm exec node-pre-gyp publish $GYP_ARGS
       else
         echo "Not a tagged build - not publishing"
       fi
@@ -61,7 +61,7 @@ aliases:
       export PATH=/c/nodejs:$PATH
       COMMIT_MESSAGE=`git log --format=%s -n 1 $CIRCLE_SHA1`
       if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]] && [[ "$PUBLISH" == "true" ]]; then
-        ./node_modules/.bin/node-pre-gyp publish $GYP_ARGS
+        pnpm exec node-pre-gyp publish $GYP_ARGS
       else
         echo "Not a tagged build - not publishing"
       fi
@@ -74,10 +74,11 @@ aliases:
       # Install git-lfs (not part of the standard Docker images)- run: sudo apt-get update
       - run: curl -sSL https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
       - run: sudo apt-get update && sudo apt-get install -y git-lfs && git-lfs install --force && git-lfs pull
-      - run: npm install --build-from-source
+      - run: corepack enable && corepack prepare pnpm@10.14.0 --activate
+      - run: npm_config_build_from_source=true pnpm install --frozen-lockfile
       - run: *build-command
 
-      - run: npm run test
+      - run: pnpm test
       - run: *publish-command
 
 
@@ -99,11 +100,13 @@ aliases:
           name: Install
           command: |
             node -v
-            npm install --build-from-source
-            npm install electron@$ELECTRON_VERSION
+            corepack enable
+            corepack prepare pnpm@10.14.0 --activate
+            pnpm install --frozen-lockfile
+            pnpm add --save-dev electron@$ELECTRON_VERSION
       - run: *build-command
-      - run: npm run pretest
-      - run: xvfb-run ./node_modules/.bin/electron-mocha --timeout 480000
+      - run: pnpm run pretest
+      - run: xvfb-run pnpm exec electron-mocha --timeout 480000
       - run: *publish-command
 
   - &common-macos
@@ -129,18 +132,21 @@ aliases:
             source $BASH_ENV
             mv node-v$NODE_VERSION-darwin-x64 $NODE_PATH
             node -v
+            corepack enable
+            corepack prepare pnpm@10.14.0 --activate
+            pnpm -v
 
       - run:
           name: Install & Build
           command: |
             node -v
-            npm install --build-from-source
+            npm_config_build_from_source=true pnpm install --frozen-lockfile
       - run: *build-command
       - run:
           name: Run Tests
           command: |
             if [[ "${SKIP_TEST}" != "true" ]]; then
-              npm run test
+              pnpm test
             fi
       - run: *publish-command
 
@@ -167,17 +173,20 @@ aliases:
             source $BASH_ENV
             mv node-v$NODE_VERSION-darwin-x64 $NODE_PATH
             node -v
+            corepack enable
+            corepack prepare pnpm@10.14.0 --activate
+            pnpm -v
 
       - run:
           name: Install
           command: |
             node -v
-            npm install --build-from-source
-            npm install electron@$ELECTRON_VERSION
+            pnpm install --frozen-lockfile
+            pnpm add --save-dev electron@$ELECTRON_VERSION
 
       - run: *build-command
-      - run: npm run pretest
-      - run: ./node_modules/.bin/electron-mocha --timeout 480000
+      - run: pnpm run pretest
+      - run: pnpm exec electron-mocha --timeout 480000
       - run:
           <<: *publish-command
 
@@ -199,12 +208,16 @@ aliases:
             $env:PATH = 'C:\nodejs;{0}' -f $env:PATH
             [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
 
-            # npm --vs2015 install --global windows-build-tools
+            corepack enable
+            corepack prepare pnpm@10.14.0 --activate
+            pnpm -v
 
             node -v
       - run:
           name: Install
-          command: npm install --build-from-source
+          command: |
+            $env:npm_config_build_from_source = 'true'
+            pnpm install --frozen-lockfile
       - run: *build-command-windows
       - run:
           name: Test
@@ -212,8 +225,8 @@ aliases:
           command: |
             export PATH=/c/nodejs:$PATH
             if [[ "${SKIP_TEST}" != "true" ]]; then
-              npm run test
-              ./node_modules/.bin/electron-mocha --timeout 480000
+              pnpm test
+              pnpm exec electron-mocha --timeout 480000
             fi
       - run: *publish-command-windows
       - store_artifacts:
@@ -225,36 +238,36 @@ aliases:
 #            ./node_modules/.bin/electron "test/support/createdb-electron.js"
 #            ./node_modules/.bin/electron-mocha --timeout 480000
 jobs:
-  build-16:
+  build-20:
     <<: *common-build
     environment:
       PUBLISH: true
       ELECTRON_VERSION: "16.0.2"
     docker:
-      - image: circleci/node:16.9.1-stretch
+      - image: cimg/node:20.19
 
   # Node version should match electron's node version.
   # See https://github.com/mapbox/node-sqlite3/pull/1367
   build-electron-16:
     <<: *common-electron-linux
     docker:
-      - image: circleci/node:16.9.1-stretch
+      - image: cimg/node:20.19
     environment:
       ELECTRON_VERSION: "16.0.2"
 
 
-  build-macos-16:
+  build-macos-20:
     <<: *common-macos
     environment:
       PUBLISH: true
-      NODE_VERSION: "16.9.1"
+      NODE_VERSION: "20.19.6"
       ELECTRON_VERSION: "16.0.2"
 
-  build-macos-16-arm64:
+  build-macos-20-arm64:
     <<: *common-macos
     environment:
       PUBLISH: true
-      NODE_VERSION: "16.9.1"
+      NODE_VERSION: "20.19.6"
       ELECTRON_VERSION: "16.0.2"
       BUILD_ARM64: true
       SKIP_TEST: true
@@ -263,28 +276,28 @@ jobs:
   # See https://github.com/mapbox/node-sqlite3/pull/1367
 
   # Build the published N-API 6 binaries
-  windows-16_x86:
+  windows-20_x86:
     <<: *common-windows
     environment:
-      NODE_VERSION: "16.9.1"
+      NODE_VERSION: "20.19.6"
       NODE_ARCH: x86
       PUBLISH: true
       ELECTRON_VERSION: "16.0.2"
       BUILD_ARM64: false
 
-  windows-16_x64:
+  windows-20_x64:
     <<: *common-windows
     environment:
-      NODE_VERSION: "16.9.1"
+      NODE_VERSION: "20.19.6"
       NODE_ARCH: x64
       PUBLISH: true
       ELECTRON_VERSION: "16.0.2"
       BUILD_ARM64: false
 
-  windows-16_arm64:
+  windows-20_arm64:
     <<: *common-windows
     environment:
-      NODE_VERSION: "16.9.1"
+      NODE_VERSION: "20.19.6"
       NODE_ARCH: x64
       PUBLISH: true
       ELECTRON_VERSION: "16.0.2"
@@ -295,10 +308,10 @@ workflows:
   version: 2
   build_all:
     jobs:
-      - build-16
+      - build-20
       - build-electron-16
-      - build-macos-16-arm64
-      - build-macos-16
-      - windows-16_x86
-      - windows-16_x64
-      - windows-16_arm64
+      - build-macos-20-arm64
+      - build-macos-20
+      - windows-20_x86
+      - windows-20_x64
+      - windows-20_arm64

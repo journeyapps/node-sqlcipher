@@ -13,8 +13,17 @@ If no matching binary is available for your platform or runtime, the published p
 # Installation
 
 ```sh
-yarn add "@journeyapps/sqlcipher"
+pnpm add "@journeyapps/sqlcipher"
 # Or: npm install --save "@journeyapps/sqlcipher"
+```
+
+## Development
+
+This repository uses `pnpm` for local development and CI.
+
+```sh
+pnpm install
+pnpm test
 ```
 
 # Usage
@@ -55,7 +64,7 @@ A copy of the source for SQLCipher 4.14.0 is bundled, which is based on SQLite 3
 
 Building from source when installing the package is supported again.
 
-The published tarball includes `binding.gyp`, `deps/`, and `src/` so that `npm install --build-from-source`, `node-gyp rebuild`, and rebuild tools such as `electron-rebuild` can compile the addon when needed.
+The published tarball includes `binding.gyp`, `deps/`, and `src/` so that `pnpm install`, `npm install`, `node-gyp rebuild`, and rebuild tools such as `electron-rebuild` can compile the addon when needed.
 
 Platform notes:
 

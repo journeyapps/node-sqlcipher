@@ -2,6 +2,7 @@
   "name": "@journeyapps/sqlcipher",
   "description": "Asynchronous, non-blocking SQLCipher bindings",
   "version": "5.3.1",
+  "packageManager": "pnpm@10.14.0",
   "homepage": "https://github.com/journeyapps/node-sqlcipher",
   "author": {
     "name": "JourneyApps",
@@ -52,7 +53,7 @@
     "eslint": "3.5.0",
     "mocha": "^5.2.0",
     "node-abi": "^2.19.3",
-    "node-gyp": "^6.1.0"
+    "node-gyp": "^10.3.1"
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
@@ -70,6 +71,12 @@
   ],
   "main": "./lib/sqlite3",
   "types": "./lib/sqlite3.d.ts",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js",
+      "electron"
+    ]
+  },
   "files": [
     "binding.gyp",
     "deps/common-sqlite.gypi",

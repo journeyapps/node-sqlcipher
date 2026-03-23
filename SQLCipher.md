@@ -48,13 +48,13 @@ This will refresh the files in `deps/OpenSSL-Win32`, `deps/OpenSSL-Win64`, `deps
 Run:
 
 ```sh
-./node_modules/.bin/node-gyp rebuild
+pnpm exec node-gyp rebuild
 ```
 
 Then run the tests:
 
 ```sh
-npm run test
+pnpm test
 ```
 
 If you want to verify the source-build fallback path specifically, temporarily move the matching prebuilt binary out of `lib/binding/` and rerun the tests.
@@ -73,4 +73,3 @@ This repository now builds SQLCipher with:
  * Use CommonCrypto on macOS.
  * Use the vendored Windows OpenSSL headers and static libraries for Windows release binaries.
  * Add additional define statements required by SQLCipher.
-
