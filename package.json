@@ -2,7 +2,7 @@
   "name": "@journeyapps/sqlcipher",
   "description": "Asynchronous, non-blocking SQLCipher bindings",
   "version": "5.3.1",
-  "homepage": "http://github.com/journeyapps/node-sqlcipher",
+  "homepage": "https://github.com/journeyapps/node-sqlcipher",
   "author": {
     "name": "JourneyApps",
     "url": "https://journeyapps.com/"
@@ -14,7 +14,6 @@
     "remote_path": "./{name}/v{version}/{toolset}/",
     "package_name": "napi-v{napi_build_version}-{platform}-{arch}.tar.gz",
     "napi_versions": [
-      3,
       6
     ]
   },
@@ -38,10 +37,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/journeyapps/node-sqlcipher.git"
+    "url": "https://github.com/journeyapps/node-sqlcipher.git"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
+    "bindings": "^1.5.0",
     "node-addon-api": "^3.0.0"
   },
   "devDependencies": {
@@ -58,7 +58,8 @@
     "install": "node-pre-gyp install --fallback-to-build",
     "pretest": "node test/support/createdb.js",
     "test": "mocha -R spec --timeout 480000",
-    "pack": "node-pre-gyp package"
+    "pack": "node-pre-gyp package",
+    "rebuild": "node-gyp rebuild"
   },
   "license": "BSD-3-Clause",
   "keywords": [
@@ -70,7 +71,21 @@
   "main": "./lib/sqlite3",
   "types": "./lib/sqlite3.d.ts",
   "files": [
+    "binding.gyp",
+    "deps/common-sqlite.gypi",
+    "deps/openssl-include/**/*",
+    "deps/openssl-windows.bat",
+    "deps/OpenSSL-Win32/*.lib",
+    "deps/OpenSSL-Win32/*.pdb",
+    "deps/OpenSSL-Win64/*.lib",
+    "deps/OpenSSL-Win64/*.pdb",
+    "deps/OpenSSL-Win64-ARM/*.lib",
+    "deps/OpenSSL-Win64-ARM/*.pdb",
+    "deps/sqlcipher-amalgamation/**/*",
+    "deps/sqlite3.gyp",
     "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "src/",
     "lib/**/*.ts",
     "sqlite3.js"
   ]
