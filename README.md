@@ -21,6 +21,10 @@ pnpm add "@journeyapps/sqlcipher"
 
 This repository uses `pnpm` for local development and CI.
 
+The active CI matrix targets Node 24 and Electron 41.
+
+Use `nvm use` to match the checked-in Node version from `.nvmrc` when working locally.
+
 ```sh
 pnpm install
 pnpm test
@@ -64,7 +68,7 @@ A copy of the source for SQLCipher 4.14.0 is bundled, which is based on SQLite 3
 
 Building from source when installing the package is supported again.
 
-The published tarball includes `binding.gyp`, `deps/`, and `src/` so that `pnpm install`, `npm install`, `node-gyp rebuild`, and rebuild tools such as `electron-rebuild` can compile the addon when needed.
+The published tarball includes `binding.gyp`, `deps/`, and `src/` so that `pnpm install`, `npm install`, `node-gyp rebuild`, and rebuild tools such as `@electron/rebuild` can compile the addon when needed.
 
 Platform notes:
 
@@ -72,13 +76,13 @@ Platform notes:
 2. Linux links against the system `libcrypto`.
 3. Windows release binaries continue to use vendored static OpenSSL artifacts from `deps/`.
 
-## Usage with electron-forge / electron-rebuild
+## Usage with electron-forge / @electron/rebuild
 
-[electron-forge](https://www.electronforge.io/) uses [electron-rebuild](https://github.com/electron/electron-rebuild) and will rebuild native modules from source by default.
+[electron-forge](https://www.electronforge.io/) uses [@electron/rebuild](https://github.com/electron/rebuild) and will rebuild native modules from source by default.
 
 That rebuild path is now supported by the published package. If a matching prebuilt binary exists you can still skip rebuilding this module to speed up install times, but it is no longer required as a workaround.
 
-To skip rebuilding when a matching prebuilt binary is already present, disable rebuilding of this library using the `onlyModules` option of `electron-rebuild` in your `package.json`:
+To skip rebuilding when a matching prebuilt binary is already present, disable rebuilding of this library using the `onlyModules` option of `@electron/rebuild` in your `package.json`:
 
         "config": {
             "forge": {

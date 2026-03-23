@@ -17,9 +17,6 @@ function publish() {
 
 function electron_pretest() {
     pnpm add --save-dev electron@${ELECTRON_VERSION}
-    if [ "$NODE_VERSION" -le 6 ]; then
-        pnpm add --save-dev electron-mocha@7
-    fi
     if [ "${TRAVIS_OS_NAME}" = "osx" ]; then 
         (sudo Xvfb :99 -ac -screen 0 1024x768x8; echo ok )&
     else
