@@ -121,6 +121,7 @@
           './sqlcipher-amalgamation/'
         ],
         'defines': [
+          'HAVE_STDINT_H=1',
           'SQLITE_THREADSAFE=1',
           'HAVE_USLEEP=1',
           'SQLITE_ENABLE_FTS3',
@@ -140,6 +141,7 @@
       ],
       'defines': [
         '_REENTRANT=1',
+        'HAVE_STDINT_H=1',
         'SQLITE_THREADSAFE=1',
         'HAVE_USLEEP=1',
         'SQLITE_ENABLE_FTS3',
