@@ -2,9 +2,6 @@ name: Refresh Windows OpenSSL
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - chore/upgrade-openssl
 
 permissions:
   contents: read
