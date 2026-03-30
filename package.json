@@ -50,13 +50,9 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
-    "@electron/rebuild": "^4.0.1",
-    "aws-sdk": "^2.641.0",
     "electron": "^41.0.0",
     "electron-mocha": "^13.1.0",
-    "eslint": "3.5.0",
     "mocha": "^5.2.0",
-    "node-abi": "^4.14.0",
     "node-gyp": "^10.3.1"
   },
   "scripts": {
