@@ -96,12 +96,12 @@ jobs:
   #           run_tests: false
   #           run_electron_tests: true
   #         - name: build-macos-24
-  #           runner: macos-13
+  #           runner: macos-15-intel
   #           target_arch: ""
   #           run_tests: true
   #           run_electron_tests: false
   #         - name: build-macos-24-arm64
-  #           runner: macos-13
+  #           runner: macos-15
   #           target_arch: arm64
   #           run_tests: false
   #           run_electron_tests: false
@@ -165,9 +165,11 @@ jobs:
   #
   #     - name: Run Electron Tests
   #       if: ${{ matrix.run_electron_tests && runner.os == 'Linux' }}
+  #       env:
+  #         ELECTRON_DISABLE_SANDBOX: "true"
   #       run: |
   #         pnpm run pretest
-  #         xvfb-run pnpm exec electron-mocha --timeout 480000
+  #         xvfb-run -a pnpm exec electron-mocha --timeout 480000
   #
   #     - name: Run Electron Tests
   #       if: ${{ matrix.run_electron_tests && runner.os == 'Windows' }}

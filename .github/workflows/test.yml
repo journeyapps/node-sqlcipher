@@ -65,13 +65,15 @@ jobs:
 
       - name: Run Electron Tests
         if: matrix.run_electron_tests
+        env:
+          ELECTRON_DISABLE_SANDBOX: "true"
         run: |
           pnpm run pretest
-          xvfb-run pnpm exec electron-mocha --timeout 480000
+          xvfb-run -a pnpm exec electron-mocha --timeout 480000
 
   macos:
     name: ${{ matrix.name }}
-    runs-on: macos-13
+    runs-on: ${{ matrix.runner }}
     defaults:
       run:
         shell: bash
@@ -80,9 +82,11 @@ jobs:
       matrix:
         include:
           - name: build-macos-24
+            runner: macos-15-intel
             target_arch: ""
             run_tests: true
           - name: build-macos-24-arm64
+            runner: macos-15
             target_arch: arm64
             run_tests: false
     steps:
