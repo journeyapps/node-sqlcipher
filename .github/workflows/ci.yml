@@ -1,0 +1,254 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ELECTRON_VERSION: 41.0.0
+
+jobs:
+  linux:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: build-24
+            publish: true
+            run_tests: true
+            run_electron_tests: false
+          - name: build-electron-41
+            publish: false
+            run_tests: false
+            run_electron_tests: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install Linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Install dependencies
+        run: npm_config_build_from_source=true pnpm install --frozen-lockfile
+
+      - name: Build
+        run: |
+          GYP_ARGS=(
+            --runtime=electron
+            --target="${ELECTRON_VERSION}"
+            --dist-url=https://electronjs.org/headers
+          )
+          pnpm exec node-pre-gyp rebuild package testpackage "${GYP_ARGS[@]}"
+
+      - name: Run tests
+        if: matrix.run_tests
+        run: pnpm test
+
+      - name: Run Electron tests
+        if: matrix.run_electron_tests
+        run: |
+          pnpm run pretest
+          xvfb-run pnpm exec electron-mocha --timeout 480000
+
+      - name: Publish
+        if: github.event_name == 'push' && matrix.publish && contains(github.event.head_commit.message, '[publish binary]')
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        run: |
+          if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+            echo "Skipping publish because AWS credentials are not configured"
+            exit 0
+          fi
+
+          GYP_ARGS=(
+            --runtime=electron
+            --target="${ELECTRON_VERSION}"
+            --dist-url=https://electronjs.org/headers
+          )
+          pnpm exec node-pre-gyp publish "${GYP_ARGS[@]}"
+
+  macos:
+    name: ${{ matrix.name }}
+    runs-on: macos-13
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: build-macos-24
+            publish: true
+            target_arch: ""
+            run_tests: true
+          - name: build-macos-24-arm64
+            publish: true
+            target_arch: arm64
+            run_tests: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm_config_build_from_source=true pnpm install --frozen-lockfile
+
+      - name: Build
+        env:
+          TARGET_ARCH: ${{ matrix.target_arch }}
+        run: |
+          GYP_ARGS=(
+            --runtime=electron
+            --target="${ELECTRON_VERSION}"
+            --dist-url=https://electronjs.org/headers
+          )
+          if [[ -n "${TARGET_ARCH:-}" ]]; then
+            GYP_ARGS+=(--target_arch="${TARGET_ARCH}")
+          fi
+          pnpm exec node-pre-gyp rebuild package testpackage "${GYP_ARGS[@]}"
+
+      - name: Run tests
+        if: matrix.run_tests
+        run: pnpm test
+
+      - name: Publish
+        if: github.event_name == 'push' && matrix.publish && contains(github.event.head_commit.message, '[publish binary]')
+        env:
+          TARGET_ARCH: ${{ matrix.target_arch }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        run: |
+          if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+            echo "Skipping publish because AWS credentials are not configured"
+            exit 0
+          fi
+
+          GYP_ARGS=(
+            --runtime=electron
+            --target="${ELECTRON_VERSION}"
+            --dist-url=https://electronjs.org/headers
+          )
+          if [[ -n "${TARGET_ARCH:-}" ]]; then
+            GYP_ARGS+=(--target_arch="${TARGET_ARCH}")
+          fi
+          pnpm exec node-pre-gyp publish "${GYP_ARGS[@]}"
+
+  windows:
+    name: ${{ matrix.name }}
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-24_x86
+            publish: true
+            node_arch: x86
+            target_arch: ""
+            run_tests: true
+          - name: windows-24_x64
+            publish: true
+            node_arch: x64
+            target_arch: ""
+            run_tests: true
+          - name: windows-24_arm64
+            publish: true
+            node_arch: x64
+            target_arch: arm64
+            run_tests: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          architecture: ${{ matrix.node_arch }}
+          cache: pnpm
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm_config_build_from_source=true pnpm install --frozen-lockfile
+
+      - name: Build
+        env:
+          TARGET_ARCH: ${{ matrix.target_arch }}
+        run: |
+          GYP_ARGS=(
+            --runtime=electron
+            --target="${ELECTRON_VERSION}"
+            --dist-url=https://electronjs.org/headers
+          )
+          if [[ -n "${TARGET_ARCH:-}" ]]; then
+            GYP_ARGS+=(--target_arch="${TARGET_ARCH}")
+          fi
+          pnpm exec node-pre-gyp rebuild package testpackage "${GYP_ARGS[@]}"
+
+      - name: Run tests
+        if: matrix.run_tests
+        run: |
+          pnpm test
+          pnpm exec electron-mocha --timeout 480000
+
+      - name: Publish
+        if: github.event_name == 'push' && matrix.publish && contains(github.event.head_commit.message, '[publish binary]')
+        env:
+          TARGET_ARCH: ${{ matrix.target_arch }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        run: |
+          if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+            echo "Skipping publish because AWS credentials are not configured"
+            exit 0
+          fi
+
+          GYP_ARGS=(
+            --runtime=electron
+            --target="${ELECTRON_VERSION}"
+            --dist-url=https://electronjs.org/headers
+          )
+          if [[ -n "${TARGET_ARCH:-}" ]]; then
+            GYP_ARGS+=(--target_arch="${TARGET_ARCH}")
+          fi
+          pnpm exec node-pre-gyp publish "${GYP_ARGS[@]}"

@@ -8,8 +8,8 @@ General guidelines for contributing to node-sqlcipher.
 
 In sqlite3's directory (where its `package.json` resides) run the following:
 
-    npm install --build-from-source
-    npm test
+    pnpm install
+    pnpm test
 
 ## Developing / Pre-release
 
@@ -23,7 +23,7 @@ To release a new version:
 
 **1)** Ensure tests are passing
 
-Before considering a release all the tests need to be passing on CircleCI.
+Before considering a release all the tests need to be passing in GitHub Actions.
 
 **2)** Bump commit
 
@@ -37,7 +37,7 @@ git commit --allow-empty -m "[publish binary]"
 
 **3)** Ensure binaries built
 
-Check the CircleCI pages to ensure they are all green as an indication that the `[publish binary]` command worked.
+Check the GitHub Actions workflow runs to ensure they are all green as an indication that the `[publish binary]` command worked.
 
 Note: NEVER republish binaries for an existing released version.
 
@@ -48,5 +48,5 @@ An official release requires:
  - Updating the CHANGELOG.md
  - Create and push github tag like `git tag v3.1.1 -m "v3.1.1" && git push --tags`
  - Ensure you have a clean checkout (no extra files in your check that are not known by git). You need to be careful, for instance, to avoid a large accidental file being packaged by npm. You can get a view of what npm will publish by running `make testpack`
- - Fully rebuild and ensure install from binary works: `make clean && npm install --fallback-to-build=false`
+ - Fully rebuild and ensure install from binary works: `make clean && npm_config_fallback_to_build=false pnpm install --frozen-lockfile`
  - Then publish the module to npm repositories by running `npm publish`
