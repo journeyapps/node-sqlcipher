@@ -30,6 +30,10 @@ jobs:
           lfs: true
           fetch-depth: 0
 
+      - name: Unpublish previous dev version
+#        Unpublish this 240MB dev package from here because I don't have permission to directly do so
+        run: npm unpublish @journeyapps/sqlcipher@0.0.0-dev-20260330151604
+
       - name: Install Linux dependencies
         run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
 
