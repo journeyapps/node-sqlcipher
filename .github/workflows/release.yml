@@ -30,6 +30,9 @@ jobs:
           lfs: true
           fetch-depth: 0
 
+      - name: Install Linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
+
       - name: Setup Project
         uses: ./.github/actions/setup-node-pnpm
         with:
