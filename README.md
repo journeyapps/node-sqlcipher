@@ -8,7 +8,7 @@ Published binaries are built against N-API 6.
 
 Older N-API 3 binaries are no longer published.
 
-If no matching binary is available for your platform or runtime, the published package includes the native sources needed to rebuild from source.
+If no matching binary is available for your platform or runtime, the published package includes the native sources needed to rebuild from source on macOS and Linux.
 
 # Installation
 
@@ -68,13 +68,34 @@ A copy of the source for SQLCipher 4.14.0 is bundled, which is based on SQLite 3
 
 Building from source when installing the package is supported again.
 
-The published tarball includes `binding.gyp`, `deps/`, and `src/` so that `pnpm install`, `npm install`, `node-gyp rebuild`, and rebuild tools such as `@electron/rebuild` can compile the addon when needed.
+The published tarball includes the native sources needed for macOS and Linux rebuilds so that `pnpm install`, `npm install`, `node-gyp rebuild`, and rebuild tools such as `@electron/rebuild` can compile the addon when needed.
 
 Platform notes:
 
 1. macOS uses SQLCipher's CommonCrypto provider via `Security.framework` and does not require Homebrew `openssl@1.1`.
 2. Linux links against the system `libcrypto`.
-3. Windows release binaries continue to use vendored static OpenSSL artifacts from `deps/`.
+3. Windows installs should use a matching prebuilt binary. The published npm tarball no longer includes the vendored Windows OpenSSL toolchain needed for source builds.
+
+### Windows source builds
+
+Windows source builds are still possible, but they now require a checkout of this repository instead of the published npm tarball.
+
+From a Windows checkout of the repository:
+
+1. Refresh the vendored OpenSSL 3 headers and static libraries:
+
+   ```bat
+   deps\openssl-windows.bat
+   ```
+
+2. Install dependencies and rebuild:
+
+   ```bat
+   pnpm install
+   pnpm exec node-pre-gyp rebuild
+   ```
+
+This refresh populates `deps/OpenSSL-Win32`, `deps/OpenSSL-Win64`, `deps/OpenSSL-Win64-ARM`, and `deps/openssl-include`, which are required by the Windows build configuration.
 
 ## Usage with electron-forge / @electron/rebuild
 
@@ -102,7 +123,7 @@ On macOS we use CommonCrypto instead of a vendored OpenSSL build.
 
 On Linux we dynamically link against the system OpenSSL / `libcrypto`.
 
-For Windows release binaries we keep static OpenSSL artifacts in `deps/`. These can be refreshed with [vcpkg](https://github.com/microsoft/vcpkg) via `deps/openssl-windows.bat`.
+For repository-based Windows builds we keep static OpenSSL artifacts in `deps/`. These can be refreshed with [vcpkg](https://github.com/microsoft/vcpkg) via `deps/openssl-windows.bat`.
 
 # API
 
