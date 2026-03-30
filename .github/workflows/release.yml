@@ -1,0 +1,202 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+env:
+  SECRETS: ${{ toJSON(secrets) }}
+  ELECTRON_VERSION: 41.0.0
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install PNPM
+        run: npm i pnpm@10 -g
+
+      - name: Install Dependencies
+        run: npm_config_build_from_source=true pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: pnpm test
+
+      - name: Ensure pending changesets exist for dev publish
+#        Removed so that we can test dev before workflow is available on master (i.e. we can't manually trigger workflow now)
+#        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if ! find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' -print -quit | grep -q .; then
+            echo "No pending changesets found. Add a changeset before running a dev publish."
+            exit 1
+          fi
+
+      - name: Dev Publish
+#        Removed so that we can test dev before workflow is available on master (i.e. we can't manually trigger workflow now)
+#        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: pnpm release:dev
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+#      - name: Prod Create Release Pull Request or Publish
+#        if: ${{ github.event_name == 'push' }}
+#        uses: changesets/action@v1
+#        id: changesets
+#        with:
+#          version: pnpm version-packages
+#          publish: pnpm release
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Binary publishing is temporarily disabled.
+  # Consumers fall back to source builds when they install snapshot or release packages.
+  #
+  # publish-binaries:
+  #   name: ${{ matrix.name }}
+  #   needs: release
+  #   if: ${{ github.event_name == 'push' && needs.release.outputs.published == 'true' }}
+  #   runs-on: ${{ matrix.runner }}
+  #   defaults:
+  #     run:
+  #       shell: bash
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - name: build-24
+  #           runner: ubuntu-latest
+  #           node_arch: x64
+  #           target_arch: ""
+  #           run_tests: true
+  #           run_electron_tests: false
+  #         - name: build-electron-41
+  #           runner: ubuntu-latest
+  #           node_arch: x64
+  #           target_arch: ""
+  #           run_tests: false
+  #           run_electron_tests: true
+  #         - name: build-macos-24
+  #           runner: macos-13
+  #           node_arch: x64
+  #           target_arch: ""
+  #           run_tests: true
+  #           run_electron_tests: false
+  #         - name: build-macos-24-arm64
+  #           runner: macos-13
+  #           node_arch: x64
+  #           target_arch: arm64
+  #           run_tests: false
+  #           run_electron_tests: false
+  #         - name: windows-24_x86
+  #           runner: windows-latest
+  #           node_arch: x86
+  #           target_arch: ""
+  #           run_tests: true
+  #           run_electron_tests: true
+  #         - name: windows-24_x64
+  #           runner: windows-latest
+  #           node_arch: x64
+  #           target_arch: ""
+  #           run_tests: true
+  #           run_electron_tests: true
+  #         - name: windows-24_arm64
+  #           runner: windows-latest
+  #           node_arch: x64
+  #           target_arch: arm64
+  #           run_tests: false
+  #           run_electron_tests: false
+  #   steps:
+  #     - name: Checkout Repo
+  #       uses: actions/checkout@v6
+  #       with:
+  #         lfs: true
+  #         fetch-depth: 0
+  #
+  #     - name: Setup NodeJS
+  #       uses: actions/setup-node@v6
+  #       with:
+  #         node-version-file: .nvmrc
+  #         architecture: ${{ matrix.node_arch }}
+  #         cache: pnpm
+  #
+  #     - name: Install PNPM
+  #       run: npm i pnpm@10 -g
+  #
+  #     - name: Install Linux dependencies
+  #       if: ${{ runner.os == 'Linux' }}
+  #       run: sudo apt-get update && sudo apt-get install -y libgtk2.0-0 libgtk-3-dev libxtst6 libxss1 libnss3 libasound2 xvfb
+  #
+  #     - name: Install Dependencies
+  #       run: npm_config_build_from_source=true pnpm install --frozen-lockfile
+  #
+  #     - name: Build
+  #       env:
+  #         TARGET_ARCH: ${{ matrix.target_arch }}
+  #       run: |
+  #         GYP_ARGS=(
+  #           --runtime=electron
+  #           --target="${ELECTRON_VERSION}"
+  #           --dist-url=https://electronjs.org/headers
+  #         )
+  #         if [[ -n "${TARGET_ARCH:-}" ]]; then
+  #           GYP_ARGS+=(--target_arch="${TARGET_ARCH}")
+  #         fi
+  #         pnpm exec node-pre-gyp rebuild package testpackage "${GYP_ARGS[@]}"
+  #
+  #     - name: Run Tests
+  #       if: ${{ matrix.run_tests }}
+  #       run: pnpm test
+  #
+  #     - name: Run Electron Tests
+  #       if: ${{ matrix.run_electron_tests && runner.os == 'Linux' }}
+  #       run: |
+  #         pnpm run pretest
+  #         xvfb-run pnpm exec electron-mocha --timeout 480000
+  #
+  #     - name: Run Electron Tests
+  #       if: ${{ matrix.run_electron_tests && runner.os == 'Windows' }}
+  #       run: pnpm exec electron-mocha --timeout 480000
+  #
+  #     - name: Publish Binaries
+  #       env:
+  #         TARGET_ARCH: ${{ matrix.target_arch }}
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  #       run: |
+  #         GYP_ARGS=(
+  #           --runtime=electron
+  #           --target="${ELECTRON_VERSION}"
+  #           --dist-url=https://electronjs.org/headers
+  #         )
+  #         if [[ -n "${TARGET_ARCH:-}" ]]; then
+  #           GYP_ARGS+=(--target_arch="${TARGET_ARCH}")
+  #         fi
+  #         pnpm exec node-pre-gyp publish "${GYP_ARGS[@]}"

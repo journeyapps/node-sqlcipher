@@ -17,13 +17,19 @@ Create a milestone for the next release on github. If all anticipated changes ar
 
 Assign tickets and pull requests you are working to the milestone you created.
 
+Create a changeset for any change that should result in a published package version:
+
+```sh
+pnpm changeset
+```
+
 ## Releasing
 
 To release a new version:
 
 **1)** Ensure tests are passing
 
-Before considering a release all the tests need to be passing in GitHub Actions.
+Before considering a release all the tests need to be passing in the `Test` and `Release` GitHub Actions workflows.
 
 **2)** Bump commit
 
@@ -37,7 +43,11 @@ git commit --allow-empty -m "[publish binary]"
 
 **3)** Ensure binaries built
 
-Check the GitHub Actions workflow runs to ensure they are all green as an indication that the `[publish binary]` command worked.
+On `master`, the `Release` workflow uses Changesets to either open/update a release pull request or publish the package if a versioning pull request has already been merged.
+
+If you want a dev publish, run the `Release` workflow manually with `workflow_dispatch`. That path publishes a snapshot package to npm using the `dev` tag and does not publish prebuilt binaries to S3.
+
+Prebuilt binary publishing is currently commented out in the workflow, so consumers intentionally fall back to source builds for both dev and release packages.
 
 Note: NEVER republish binaries for an existing released version.
 

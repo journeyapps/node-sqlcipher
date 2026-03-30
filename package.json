@@ -40,14 +40,18 @@
     "type": "git",
     "url": "https://github.com/journeyapps/node-sqlcipher.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
     "bindings": "^1.5.0",
     "node-addon-api": "^3.0.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.641.0",
+    "@changesets/cli": "^2.30.0",
     "@electron/rebuild": "^4.0.1",
+    "aws-sdk": "^2.641.0",
     "electron": "^41.0.0",
     "electron-mocha": "^13.1.0",
     "eslint": "3.5.0",
@@ -56,11 +60,15 @@
     "node-gyp": "^10.3.1"
   },
   "scripts": {
+    "changeset": "changeset",
     "install": "node-pre-gyp install --fallback-to-build",
     "pretest": "node test/support/createdb.js",
     "test": "mocha -R spec --timeout 480000",
     "pack": "node-pre-gyp package",
-    "rebuild": "node-gyp rebuild"
+    "rebuild": "node-gyp rebuild",
+    "release": "changeset publish",
+    "release:dev": "changeset version --snapshot dev && changeset publish --tag dev --no-git-tag",
+    "version-packages": "changeset version"
   },
   "license": "BSD-3-Clause",
   "keywords": [
