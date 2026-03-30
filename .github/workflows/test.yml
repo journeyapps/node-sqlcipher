@@ -124,16 +124,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: windows-24_x86
-            node_arch: x86
-            target_arch: ""
-            run_tests: true
           - name: windows-24_x64
-            node_arch: x64
             target_arch: ""
             run_tests: true
           - name: windows-24_arm64
-            node_arch: x64
             target_arch: arm64
             run_tests: false
     steps:
@@ -146,8 +140,6 @@ jobs:
 
       - name: Setup Project
         uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-architecture: ${{ matrix.node_arch }}
 
       - name: Build
         env:

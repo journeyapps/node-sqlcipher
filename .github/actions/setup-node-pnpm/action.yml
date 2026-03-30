@@ -2,10 +2,6 @@ name: Setup Node and pnpm
 description: Setup pnpm, Node.js, and install project dependencies
 
 inputs:
-  node-architecture:
-    description: Optional Node.js architecture passed to actions/setup-node
-    required: false
-    default: ""
   registry-url:
     description: Optional npm registry URL passed to actions/setup-node
     required: false
@@ -28,7 +24,6 @@ runs:
       uses: actions/setup-node@v6
       with:
         node-version-file: .nvmrc
-        architecture: ${{ inputs.node-architecture }}
         cache: pnpm
         registry-url: ${{ inputs.registry-url }}
 

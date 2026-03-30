@@ -87,43 +87,31 @@ jobs:
   #       include:
   #         - name: build-24
   #           runner: ubuntu-latest
-  #           node_arch: x64
   #           target_arch: ""
   #           run_tests: true
   #           run_electron_tests: false
   #         - name: build-electron-41
   #           runner: ubuntu-latest
-  #           node_arch: x64
   #           target_arch: ""
   #           run_tests: false
   #           run_electron_tests: true
   #         - name: build-macos-24
   #           runner: macos-13
-  #           node_arch: x64
   #           target_arch: ""
   #           run_tests: true
   #           run_electron_tests: false
   #         - name: build-macos-24-arm64
   #           runner: macos-13
-  #           node_arch: x64
   #           target_arch: arm64
   #           run_tests: false
   #           run_electron_tests: false
-  #         - name: windows-24_x86
-  #           runner: windows-latest
-  #           node_arch: x86
-  #           target_arch: ""
-  #           run_tests: true
-  #           run_electron_tests: true
   #         - name: windows-24_x64
   #           runner: windows-latest
-  #           node_arch: x64
   #           target_arch: ""
   #           run_tests: true
   #           run_electron_tests: true
   #         - name: windows-24_arm64
   #           runner: windows-latest
-  #           node_arch: x64
   #           target_arch: arm64
   #           run_tests: false
   #           run_electron_tests: false
@@ -144,7 +132,6 @@ jobs:
   #       uses: actions/setup-node@v6
   #       with:
   #         node-version-file: .nvmrc
-  #         architecture: ${{ matrix.node_arch }}
   #         cache: pnpm
   #
   #     - name: Install Linux build dependencies
