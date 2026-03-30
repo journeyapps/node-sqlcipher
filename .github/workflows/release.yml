@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - '**' # Just to trigger the dev publish since we can't manually trigger workflow on master yet. Change to master once we're back to master as default branch.
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}

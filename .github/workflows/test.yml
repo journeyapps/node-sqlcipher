@@ -1,12 +1,8 @@
 name: Test
 
 on:
-  push:
-    branches-ignore:
-      - master
-    tags-ignore:
-      - "**"
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
