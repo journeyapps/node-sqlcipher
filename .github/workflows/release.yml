@@ -30,18 +30,10 @@ jobs:
           lfs: true
           fetch-depth: 0
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v6
+      - name: Setup Project
+        uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version-file: .nvmrc
-          cache: pnpm
           registry-url: https://registry.npmjs.org
-
-      - name: Install PNPM
-        run: npm i pnpm@10 -g
-
-      - name: Install Dependencies
-        run: npm_config_build_from_source=true pnpm install --frozen-lockfile
 
       - name: Verify
         run: pnpm test
@@ -139,15 +131,18 @@ jobs:
   #         lfs: true
   #         fetch-depth: 0
   #
+  #     - name: Setup PNPM
+  #       uses: pnpm/action-setup@v4
+  #       with:
+  #         version: 10.14.0
+  #         run_install: false
+  #
   #     - name: Setup NodeJS
   #       uses: actions/setup-node@v6
   #       with:
   #         node-version-file: .nvmrc
   #         architecture: ${{ matrix.node_arch }}
   #         cache: pnpm
-  #
-  #     - name: Install PNPM
-  #       run: npm i pnpm@10 -g
   #
   #     - name: Install Linux dependencies
   #       if: ${{ runner.os == 'Linux' }}

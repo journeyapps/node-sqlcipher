@@ -40,20 +40,11 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      - name: Install PNPM
-        run: npm i pnpm@10 -g
+      - name: Setup Project
+        uses: ./.github/actions/setup-node-pnpm
 
       - name: Install Linux dependencies
         run: sudo apt-get update && sudo apt-get install -y libgtk2.0-0 libgtk-3-dev libxtst6 libxss1 libnss3 libasound2 xvfb
-
-      - name: Install Dependencies
-        run: npm_config_build_from_source=true pnpm install --frozen-lockfile
 
       - name: Build
         run: |
@@ -98,17 +89,8 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      - name: Install PNPM
-        run: npm i pnpm@10 -g
-
-      - name: Install Dependencies
-        run: npm_config_build_from_source=true pnpm install --frozen-lockfile
+      - name: Setup Project
+        uses: ./.github/actions/setup-node-pnpm
 
       - name: Build
         env:
@@ -158,18 +140,10 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v6
+      - name: Setup Project
+        uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version-file: .nvmrc
-          architecture: ${{ matrix.node_arch }}
-          cache: pnpm
-
-      - name: Install PNPM
-        run: npm i pnpm@10 -g
-
-      - name: Install Dependencies
-        run: npm_config_build_from_source=true pnpm install --frozen-lockfile
+          node-architecture: ${{ matrix.node_arch }}
 
       - name: Build
         env:
