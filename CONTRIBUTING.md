@@ -35,22 +35,6 @@ Before considering a release all the tests need to be passing in the `Test` and 
 
 Bump the version in `package.json` like https://github.com/mapbox/node-sqlite3/commit/77d51d5785b047ff40f6a8225051488a0d96f7fd
 
-What if you already committed the `package.json` bump and you have no changes to commit but want to publish binaries? In this case you can do:
-
-```sh
-git commit --allow-empty -m "[publish binary]"
-```
-
-**3)** Ensure binaries built
-
-On `master`, the `Release` workflow uses Changesets to either open/update a release pull request or publish the package if a versioning pull request has already been merged.
-
-If you want a dev publish, run the `Release` workflow manually with `workflow_dispatch`. That path publishes a snapshot package to npm using the `dev` tag and does not publish prebuilt binaries to S3.
-
-Prebuilt binary publishing is currently commented out in the workflow, so consumers intentionally fall back to source builds for both dev and release packages.
-
-Note: NEVER republish binaries for an existing released version.
-
 **7)** Officially release
 
 An official release requires:
@@ -58,5 +42,5 @@ An official release requires:
  - Updating the CHANGELOG.md
  - Create and push github tag like `git tag v3.1.1 -m "v3.1.1" && git push --tags`
  - Ensure you have a clean checkout (no extra files in your check that are not known by git). You need to be careful, for instance, to avoid a large accidental file being packaged by npm. You can get a view of what npm will publish by running `make testpack`
- - Fully rebuild and ensure install from binary works: `make clean && npm_config_fallback_to_build=false pnpm install --frozen-lockfile`
+ - Fully rebuild and ensure install from source works: `make clean && pnpm install --frozen-lockfile`
  - Then publish the module to npm repositories by running `npm publish`

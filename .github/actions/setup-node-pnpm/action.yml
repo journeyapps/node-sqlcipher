@@ -9,7 +9,7 @@ inputs:
   install-command:
     description: Command used to install project dependencies
     required: false
-    default: npm_config_build_from_source=true pnpm install --frozen-lockfile
+    default: pnpm install --frozen-lockfile
 
 runs:
   using: composite

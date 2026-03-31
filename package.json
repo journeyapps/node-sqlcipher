@@ -8,16 +8,6 @@
     "name": "JourneyApps",
     "url": "https://journeyapps.com/"
   },
-  "binary": {
-    "module_name": "node_sqlite3",
-    "module_path": "./lib/binding/napi-v{napi_build_version}-{platform}-{arch}",
-    "host": "https://journeyapps-node-binary.s3.amazonaws.com",
-    "remote_path": "./{name}/v{version}/{toolset}/",
-    "package_name": "napi-v{napi_build_version}-{platform}-{arch}.tar.gz",
-    "napi_versions": [
-      6
-    ]
-  },
   "contributors": [
     "Konstantin Käfer <mail@kkaefer.com>",
     "Dane Springmeyer <dane@mapbox.com>",
@@ -43,8 +33,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "os": [
+    "darwin",
+    "linux"
+  ],
   "dependencies": {
-    "@mapbox/node-pre-gyp": "^2.0.3",
     "bindings": "^1.5.0",
     "node-addon-api": "^8.3.1"
   },
@@ -57,10 +50,10 @@
   },
   "scripts": {
     "changeset": "changeset",
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "node-gyp rebuild",
     "pretest": "node test/support/createdb.js",
     "test": "mocha -R spec --timeout 480000",
-    "pack": "node-pre-gyp package",
+    "pack": "npm pack",
     "rebuild": "node-gyp rebuild",
     "release": "changeset publish",
     "release:dev": "changeset version --snapshot dev && changeset publish --tag dev --no-git-tag",

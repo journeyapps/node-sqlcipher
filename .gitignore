@@ -4,7 +4,6 @@
 *.lo
 *.Makefile
 *.target.gyp.mk
-lib/binding
 build
 out
 Release

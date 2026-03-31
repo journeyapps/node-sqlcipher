@@ -26,22 +26,13 @@ VERSION # rename to VERSION.txt
 
 Copy these files into `deps/sqlcipher-amalgamation`, renaming `VERSION` to `VERSION.txt`.
 
-## Step 2: Get OpenSSL libraries
+## Step 2: OpenSSL provider
 
 macOS no longer vendors OpenSSL in this repository. It uses SQLCipher's CommonCrypto provider through `Security.framework`.
 
 Linux links against the system `libcrypto`.
 
-Windows release binaries still vendor static OpenSSL artifacts because they are needed at compile time for rebuilds and published prebuilds.
-
-Run the following command on Windows to regenerate the vendored headers and static libraries:
-
-```
-cd deps
-.\openssl-windows.bat
-```
-
-This will refresh the files in `deps/OpenSSL-Win32`, `deps/OpenSSL-Win64`, `deps/OpenSSL-Win64-ARM`, and `deps/openssl-include`.
+Windows is not supported in this phase.
 
 ## Step 3: Test the build
 
@@ -57,7 +48,7 @@ Then run the tests:
 pnpm test
 ```
 
-If you want to verify the source-build fallback path specifically, temporarily move the matching prebuilt binary out of `lib/binding/` and rerun the tests.
+If you want to verify the install path used by the published package, run `pnpm install` in a clean checkout and then rerun the tests.
 
 
 # Notes
@@ -71,5 +62,5 @@ This repository now builds SQLCipher with:
 
 `deps/sqlite3.gyp` has been modified from the original node-sqlite3 one to:
  * Use CommonCrypto on macOS.
- * Use the vendored Windows OpenSSL headers and static libraries for Windows release binaries.
+ * Link against system `libcrypto` on Linux.
  * Add additional define statements required by SQLCipher.
