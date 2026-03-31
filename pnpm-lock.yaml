@@ -15,8 +15,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0
       node-addon-api:
-        specifier: ^3.0.0
-        version: 3.0.2
+        specifier: ^8.3.1
+        version: 8.3.1
     devDependencies:
       '@changesets/cli':
         specifier: ^2.30.0
@@ -839,8 +839,9 @@ packages:
     resolution: {integrity: sha512-myRT3DiWPHqho5PrJaIRyaMv2kgYf0mUVgBNOYMuCH5Ki1yEiQaf/ZJuQ62nvpc44wL5WDbTX7yGJi1Neevw8w==}
     engines: {node: '>= 0.6'}
 
-  node-addon-api@3.0.2:
-    resolution: {integrity: sha512-+D4s2HCnxPd5PjjI0STKwncjXTUKKqm74MDMz9OPXavjsGmjkvwgLtA5yoxJUdmpj52+2u+RrXgPipahKczMKg==}
+  node-addon-api@8.3.1:
+    resolution: {integrity: sha512-lytcDEdxKjGJPTLEfW4mYMigRezMlyJY8W4wxJK8zE533Jlb8L8dRuObJFWg2P+AuOIxoCgKF+2Oq4d4Zd0OUA==}
+    engines: {node: ^18 || ^20 || >= 21}
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -2174,7 +2175,7 @@ snapshots:
 
   negotiator@0.6.4: {}
 
-  node-addon-api@3.0.2: {}
+  node-addon-api@8.3.1: {}
 
   node-fetch@2.7.0(encoding@0.1.13):
     dependencies:

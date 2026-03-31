@@ -46,7 +46,7 @@
   "dependencies": {
     "@mapbox/node-pre-gyp": "^2.0.3",
     "bindings": "^1.5.0",
-    "node-addon-api": "^3.0.0"
+    "node-addon-api": "^8.3.1"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
