@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - '**' # Just to trigger the dev publish since we can't manually trigger workflow on master yet. Change to master once we're back to master as default branch.
+      - master
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -29,10 +29,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Unpublish previous dev version
-#        Unpublish this 240MB dev package from here because I don't have permission to directly do so
-        run: npm unpublish @journeyapps/sqlcipher@0.0.0-dev-20260330151604
-
       - name: Install Linux dependencies
         run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
 
@@ -45,8 +41,7 @@ jobs:
         run: pnpm test
 
       - name: Ensure pending changesets exist for dev publish
-#        Removed so that we can test dev before workflow is available on master (i.e. we can't manually trigger workflow now)
-#        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           if ! find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' -print -quit | grep -q .; then
             echo "No pending changesets found. Add a changeset before running a dev publish."
@@ -54,23 +49,22 @@ jobs:
           fi
 
       - name: Dev Publish
-#        Removed so that we can test dev before workflow is available on master (i.e. we can't manually trigger workflow now)
-#        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: pnpm release:dev
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-#      - name: Prod Create Release Pull Request or Publish
-#        if: ${{ github.event_name == 'push' }}
-#        uses: changesets/action@v1
-#        id: changesets
-#        with:
-#          version: pnpm version-packages
-#          publish: pnpm release
-#        env:
-#          GITHUB_TOKEN: ${{ github.token }}
-#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-#          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Prod Create Release Pull Request or Publish
+        if: ${{ github.event_name == 'push' }}
+        uses: changesets/action@v1
+        id: changesets
+        with:
+          version: pnpm version-packages
+          publish: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # Phase 1 intentionally publishes source-build-only packages for macOS and Linux.
+        # Phase 1 intentionally publishes source-build-only packages for macOS and Linux.
