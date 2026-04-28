@@ -1,0 +1,32 @@
+name: Setup Node and pnpm
+description: Setup pnpm, Node.js, and install project dependencies
+
+inputs:
+  registry-url:
+    description: Optional npm registry URL passed to actions/setup-node
+    required: false
+    default: ""
+  install-command:
+    description: Command used to install project dependencies
+    required: false
+    default: pnpm install --frozen-lockfile
+
+runs:
+  using: composite
+  steps:
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.14.0
+        run_install: false
+
+    - name: Setup NodeJS
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+        registry-url: ${{ inputs.registry-url }}
+
+    - name: Install Dependencies
+      shell: bash
+      run: ${{ inputs.install-command }}

@@ -36,7 +36,8 @@
     'conditions': [
       ['OS == "win"', {
         'defines': [
-          'WIN32'
+          'WIN32',
+          'SQLCIPHER_CRYPTO_OPENSSL'
         ],
         'conditions': [
           ['target_arch == "ia32"', {
@@ -67,14 +68,20 @@
         }
       },
       'OS == "mac"', {
+        'defines': [
+          'SQLCIPHER_CRYPTO_CC'
+        ],
         'link_settings': {
           'libraries': [
-            # This statically links libcrypto, whereas -lcrypto would dynamically link it
-            '<(module_root_dir)/deps/openssl-macos/libcrypto.a'
+            '-framework Security',
+            '-framework CoreFoundation'
           ]
         }
       },
       { # Linux
+        'defines': [
+          'SQLCIPHER_CRYPTO_OPENSSL'
+        ],
         'link_settings': {
           'libraries': [
             '-lcrypto'
@@ -97,8 +104,7 @@
         },
         "OS == \"mac\"", {
           'include_dirs': [
-            './sqlcipher-amalgamation/',
-            './openssl-include/'
+            './sqlcipher-amalgamation/'
           ]
         },
         { # linux
@@ -115,6 +121,7 @@
           './sqlcipher-amalgamation/'
         ],
         'defines': [
+          'HAVE_STDINT_H=1',
           'SQLITE_THREADSAFE=1',
           'HAVE_USLEEP=1',
           'SQLITE_ENABLE_FTS3',
@@ -122,6 +129,8 @@
           'SQLITE_ENABLE_JSON1',
           'SQLITE_ENABLE_RTREE',
           'SQLITE_HAS_CODEC',
+          'SQLITE_EXTRA_INIT=sqlcipher_extra_init',
+          'SQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown',
           'SQLITE_TEMP_STORE=2',
           'SQLITE_SECURE_DELETE',
           'SQLITE_ENABLE_DBSTAT_VTAB=1'
@@ -132,6 +141,7 @@
       ],
       'defines': [
         '_REENTRANT=1',
+        'HAVE_STDINT_H=1',
         'SQLITE_THREADSAFE=1',
         'HAVE_USLEEP=1',
         'SQLITE_ENABLE_FTS3',
@@ -139,6 +149,8 @@
         'SQLITE_ENABLE_JSON1',
         'SQLITE_ENABLE_RTREE',
         'SQLITE_HAS_CODEC',
+        'SQLITE_EXTRA_INIT=sqlcipher_extra_init',
+        'SQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown',
         'SQLITE_TEMP_STORE=2',
         'SQLITE_SECURE_DELETE',
         'SQLITE_ENABLE_DBSTAT_VTAB=1'

@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+env:
+  SECRETS: ${{ toJSON(secrets) }}
+  ELECTRON_VERSION: 41.0.0
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install Linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
+
+      - name: Setup Project
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          registry-url: https://registry.npmjs.org
+
+      - name: Verify
+        run: pnpm test
+
+      - name: Ensure pending changesets exist for dev publish
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if ! find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' -print -quit | grep -q .; then
+            echo "No pending changesets found. Add a changeset before running a dev publish."
+            exit 1
+          fi
+
+      - name: Dev Publish
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: pnpm release:dev
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Prod Create Release Pull Request or Publish
+        if: ${{ github.event_name == 'push' }}
+        uses: changesets/action@v1
+        id: changesets
+        with:
+          version: pnpm version-packages
+          publish: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+        # Phase 1 intentionally publishes source-build-only packages for macOS and Linux.

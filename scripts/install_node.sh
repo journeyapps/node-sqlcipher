@@ -16,6 +16,8 @@ rm -rf ./__nvm/ && git clone --depth 1 https://github.com/creationix/nvm.git ./_
 source ./__nvm/nvm.sh
 nvm install ${NODE_VERSION}
 nvm use --delete-prefix ${NODE_VERSION}
+corepack enable
+corepack prepare pnpm@10.14.0 --activate
 node --version
-npm --version
+pnpm --version
 which node

@@ -1,0 +1,105 @@
+name: Test
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SECRETS: ${{ toJSON(secrets) }}
+  ELECTRON_VERSION: 41.0.0
+
+jobs:
+  linux:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: build-24
+            run_tests: true
+            run_electron_tests: false
+          - name: build-electron-41
+            run_tests: false
+            run_electron_tests: true
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install Linux build dependencies
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev pkg-config
+
+      - name: Install Linux Electron runtime dependencies
+        if: matrix.run_electron_tests
+        run: sudo apt-get install -y libgtk-3-0 libxtst6 libxss1 libnss3 xvfb
+
+      - name: Setup Project
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Build
+        run: |
+          pnpm exec node-gyp rebuild
+
+      - name: Run Tests
+        if: matrix.run_tests
+        run: pnpm test
+
+      - name: Run Electron Tests
+        if: matrix.run_electron_tests
+        env:
+          ELECTRON_DISABLE_SANDBOX: "true"
+        run: |
+          pnpm run pretest
+          npm_config_runtime=electron npm_config_target="${ELECTRON_VERSION}" npm_config_disturl=https://electronjs.org/headers pnpm exec node-gyp rebuild
+          xvfb-run -a pnpm exec electron-mocha --timeout 480000
+
+  macos:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: build-macos-24
+            runner: macos-15-intel
+            target_arch: ""
+            run_tests: true
+          - name: build-macos-24-arm64
+            runner: macos-15
+            target_arch: arm64
+            run_tests: false
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup Project
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Build
+        env:
+          TARGET_ARCH: ${{ matrix.target_arch }}
+        run: |
+          if [[ -n "${TARGET_ARCH:-}" ]]; then
+            npm_config_target_arch="${TARGET_ARCH}" pnpm exec node-gyp rebuild
+          else
+            pnpm exec node-gyp rebuild
+          fi
+
+      - name: Run Tests
+        if: matrix.run_tests
+        run: pnpm test

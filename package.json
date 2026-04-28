@@ -2,21 +2,11 @@
   "name": "@journeyapps/sqlcipher",
   "description": "Asynchronous, non-blocking SQLCipher bindings",
   "version": "5.3.1",
-  "homepage": "http://github.com/journeyapps/node-sqlcipher",
+  "packageManager": "pnpm@10.14.0",
+  "homepage": "https://github.com/journeyapps/node-sqlcipher",
   "author": {
     "name": "JourneyApps",
     "url": "https://journeyapps.com/"
-  },
-  "binary": {
-    "module_name": "node_sqlite3",
-    "module_path": "./lib/binding/napi-v{napi_build_version}-{platform}-{arch}",
-    "host": "https://journeyapps-node-binary.s3.amazonaws.com",
-    "remote_path": "./{name}/v{version}/{toolset}/",
-    "package_name": "napi-v{napi_build_version}-{platform}-{arch}.tar.gz",
-    "napi_versions": [
-      3,
-      6
-    ]
   },
   "contributors": [
     "Konstantin Käfer <mail@kkaefer.com>",
@@ -38,27 +28,36 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/journeyapps/node-sqlcipher.git"
+    "url": "https://github.com/journeyapps/node-sqlcipher.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
   "dependencies": {
-    "@mapbox/node-pre-gyp": "^1.0.0",
-    "node-addon-api": "^3.0.0"
+    "bindings": "^1.5.0",
+    "node-addon-api": "^8.3.1"
   },
   "devDependencies": {
-    "aws-sdk": "^2.641.0",
-    "electron": "^11.2.3",
-    "electron-mocha": "^10.0.0",
-    "electron-rebuild": "^1.11.0",
-    "eslint": "3.5.0",
+    "@changesets/cli": "^2.30.0",
+    "electron": "^41.0.0",
+    "electron-mocha": "^13.1.0",
     "mocha": "^5.2.0",
-    "node-abi": "^2.19.3",
-    "node-gyp": "^6.1.0"
+    "node-gyp": "^10.3.1"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build",
+    "changeset": "changeset",
+    "install": "node-gyp rebuild",
     "pretest": "node test/support/createdb.js",
     "test": "mocha -R spec --timeout 480000",
-    "pack": "node-pre-gyp package"
+    "pack": "npm pack",
+    "rebuild": "node-gyp rebuild",
+    "release": "changeset publish",
+    "release:dev": "changeset version --snapshot dev && changeset publish --tag dev --no-git-tag",
+    "version-packages": "changeset version"
   },
   "license": "BSD-3-Clause",
   "keywords": [
@@ -69,8 +68,23 @@
   ],
   "main": "./lib/sqlite3",
   "types": "./lib/sqlite3.d.ts",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js",
+      "electron"
+    ]
+  },
   "files": [
+    "binding.gyp",
+    "deps/common-sqlite.gypi",
+    "deps/sqlcipher-amalgamation/VERSION.txt",
+    "deps/sqlcipher-amalgamation/sqlite3.c",
+    "deps/sqlcipher-amalgamation/sqlite3.h",
+    "deps/sqlcipher-amalgamation/sqlite3ext.h",
+    "deps/sqlite3.gyp",
     "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "src/",
     "lib/**/*.ts",
     "sqlite3.js"
   ]

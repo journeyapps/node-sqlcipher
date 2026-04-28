@@ -1,20 +1,40 @@
 Fork of [node-sqlite3](https://github.com/mapbox/node-sqlite3), modified to use [SQLCipher](https://www.zetetic.net/sqlcipher/).
 
-While the `node-sqlite3` project does include support for compiling against sqlcipher, it requires manual work, and does not work out-of-the-box on Electron on Windows. This fork changes the default configuration to bundle SQLCipher directly, as well as OpenSSL where required.
+This fork bundles SQLCipher directly and currently ships as a source-build-only package for macOS and Linux.
 
 ## Supported platforms
 
-Binaries are built against N-API 3 and 6, on MacOS, Windows (ia32 and x64) and Linux (x64).
+- macOS
+- Linux
 
-Node 10+ and Electron 6+ is supported.
-
-Other platforms/architectures may work by building from source - see the section below.
+Windows and prebuilt binary publishing are intentionally unsupported in this phase.
 
 # Installation
 
 ```sh
-yarn add "@journeyapps/sqlcipher"
+pnpm add "@journeyapps/sqlcipher"
 # Or: npm install --save "@journeyapps/sqlcipher"
+```
+
+The install script always builds the native addon from source.
+
+On Linux you will need the standard native toolchain plus OpenSSL development headers, for example:
+
+```sh
+sudo apt-get install -y build-essential libssl-dev pkg-config
+```
+
+## Development
+
+This repository uses `pnpm` for local development and CI on macOS and Linux.
+
+The active CI matrix targets Node 24 and Electron 41 on the supported platforms.
+
+Use `nvm use` to match the checked-in Node version from `.nvmrc` when working locally.
+
+```sh
+pnpm install
+pnpm test
 ```
 
 # Usage
@@ -49,46 +69,47 @@ db.close();
 
 # SQLCipher
 
-A copy of the source for SQLCipher 4.4.2 is bundled, which is based on SQLite 3.33.0.
+A copy of the source for SQLCipher 4.14.0 is bundled, which is based on SQLite 3.51.3.
 
-## Building from source.
+## Building from source
 
-Building from source when installing the package is only supported up to version 5.2.0.
+Building from source is the only supported install path in this phase.
 
-The two pre-built versions (N-API 3 and N-API 6) cover all electron and node versions, so building from source should
-not be required.
+The published tarball includes the native sources needed for macOS and Linux rebuilds so that `pnpm install`, `npm install`, `node-gyp rebuild`, and rebuild tools such as `@electron/rebuild` can compile the addon when needed.
 
-## Usage with electron-forge / electron-rebuild
+Platform notes:
 
-[electron-forge](https://www.electronforge.io/) uses [electron-rebuild](https://github.com/electron/electron-rebuild) and attempts to rebuild this library from source by default, in a way
-that is _not_ compatible with the way `node-pre-gyp` is used here.
+1. macOS uses SQLCipher's CommonCrypto provider via `Security.framework` and does not require Homebrew `openssl@1.1`.
+2. Linux links against the system `libcrypto`.
+3. Windows is not supported.
 
-The workaround is to disable the rebuilding:
-1. If using Electron 11+, use a node version that supports N-API 6+ (v10.20.0+ / v12.17.0+ / v14.0.0).
-2. After `npm install` / `yarn install`, make sure that the folder `node_modules/@journeyapps/sqlcipher/lib/binding/napi-v6-linux-x64` exists.
-   If not, check the previous step again, remove the `node_modules` folder, and try again.
-3. Disable rebuilding of this library using the `onlyModules` option of `electron-rebuild` in your `package.json`:
+## Usage with electron-forge / @electron/rebuild
+
+[electron-forge](https://www.electronforge.io/) uses [@electron/rebuild](https://github.com/electron/rebuild) and will rebuild native modules from source by default.
+
+That rebuild path is the expected install path for this package.
+
+To ensure this library is rebuilt along with the rest of your native dependencies, keep it included in your `@electron/rebuild` configuration:
 
         "config": {
             "forge": {
                 "electronRebuildConfig": {
-                    "onlyModules": []  // Specify other native modules here if required
+                    "onlyModules": ["@journeyapps/sqlcipher"]
                 }
             }
         }
 
-Note: [electron-builder](https://www.electron.build/) does not appear to have this issue, and should work directly.
-Similarly, using electron directly should just work, but do check that a compatible node version is used (see above). 
+Note: [electron-builder](https://www.electron.build/) should continue to work directly.
 
 ## OpenSSL
 
 SQLCipher depends on OpenSSL.
 
-For Windows, we bundle OpenSSL 1.1.1i. Binaries are generated using [vckpg](https://github.com/microsoft/vcpkg) (e.g., `.\vcpkg\vcpkg install openssl:x64-windows-static`).
+On macOS we use CommonCrypto instead of a vendored OpenSSL build.
 
-On Mac we bundle OpenSSL 1.1.1l.
+On Linux we dynamically link against the system OpenSSL / `libcrypto`.
 
-On Linux we dynamically link against the system OpenSSL.
+Windows is not supported in this phase.
 
 # API
 

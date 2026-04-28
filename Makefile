@@ -6,17 +6,16 @@ all: build
 	npm install --build-from-source
 
 build: ./node_modules
-	./node_modules/.bin/node-pre-gyp build --loglevel=silent
+	./node_modules/.bin/node-gyp rebuild
 
 debug:
-	./node_modules/.bin/node-pre-gyp rebuild --debug
+	./node_modules/.bin/node-gyp rebuild --debug
 
 verbose:
-	./node_modules/.bin/node-pre-gyp rebuild --loglevel=verbose
+	./node_modules/.bin/node-gyp rebuild --verbose
 
 clean:
 	@rm -rf ./build
-	rm -rf lib/binding/
 	rm -f test/support/big.db-journal
 	rm -rf ./node_modules/
 

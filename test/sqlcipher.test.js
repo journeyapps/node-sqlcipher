@@ -22,9 +22,10 @@ describe('sqlcipher', function() {
     });
 
 
-    it("should use openssl", function(done) {
+    it("should use the expected crypto provider", function(done) {
+        var expectedProvider = process.platform === 'darwin' ? 'commoncrypto' : 'openssl';
         db.get("PRAGMA cipher_provider", (err, result) => {
-            assert.deepEqual(result, { cipher_provider: 'openssl' });
+            assert.deepEqual(result, { cipher_provider: expectedProvider });
             done(err);
         });
     });
